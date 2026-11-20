@@ -1,0 +1,10 @@
+{
+    "type": "ProjectAutomata.ProductDefinition",
+    "object": {
+        "name": "ToyRobot",
+        "displayName": "Toy Robot",
+        "tags": ["Toy"],
+        "svgIcon": "toyrobot",
+        "priceFormula": "Factories"
+    }
+}

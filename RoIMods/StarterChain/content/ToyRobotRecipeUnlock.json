@@ -1,0 +1,17 @@
+{
+    "type": "ProjectAutomata.TechTreeRecipeUnlock",
+    "object": {
+        "name": "ToyRobotRecipeUnlock",
+        "displayName": "Toy Robot",
+        "description": "Able to produce Toy Robots at the Toy Robot Workshop.",
+        "svgIcon": "toyrobot",
+        "unlockedByDefault": false,
+        "tier": 3,
+        "requiredUnlocks": ["ToyRobotWorkshopUnlock"],
+        "includedUnlocks": [],
+        "trees": [{ "tree": "Robotics", "column": 3 }],
+        "researchCost": "Research Cost",
+        "researchTime": "Research Time",
+        "recipes": ["ToyRobot"]
+    }
+}

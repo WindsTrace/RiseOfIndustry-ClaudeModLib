@@ -1,0 +1,10 @@
+{
+    "type": "ProjectAutomata.TechTree",
+    "object": {
+        "name": "Robotics",
+        "displayName": "Robotics",
+        "svgIcon": "toyrobot",
+        "category": "Light Industry",
+        "uiOrder": 5100
+    }
+}

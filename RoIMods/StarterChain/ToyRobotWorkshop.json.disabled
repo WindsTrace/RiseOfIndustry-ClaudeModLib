@@ -1,0 +1,72 @@
+{
+    "type": "ProjectAutomata.Building",
+    "object": {
+        "name": "ToyRobotWorkshop",
+        "buildingName": "TOY ROBOT WORKSHOP",
+        "buildingPanelName": "Toy Robot Workshop",
+        "description": "Assembles Toy Robots from Steel and Light Bulbs.",
+        "baseCost": 450000,
+        "uiOrder": 50,
+        "category": "LightIndustry",
+        "tags": ["Factory"],
+        "visualization": "ToyRobotWorkshopVis",
+        "spawnDust": "StarterChain_Dust",
+        "svgIcon": "toyrobot",
+        "constructionBarIcon": "toyrobot_sprite",
+        "headerImage": "toyrobot_sprite",
+        "onlyEnabledOnBuildingRunning": ["Smoke", "Smoke (1)"],
+        "contextBasedUI": "BuildingPanel",
+        "topoXMinOffset": -3,
+        "topoXMaxOffset": 2,
+        "topoYMinOffset": -3,
+        "topoYMaxOffset": 0,
+        "restrictions": ["Owns Permit", "Can Afford", "Can Build At"],
+        "nameFormat": "%n %i",
+        "parkingPathTransforms": ["ParkingSpot"],
+        "connections": [
+            {
+                "x": 0, "y": 1, "direction": "South", "tilesAmt": 1,
+                "network": "Road", "tier": 0, "invisible": false,
+                "impliesConnectivities": true, "connectionType": "DEFAULT"
+            }
+        ]
+    },
+    "components": [
+        {
+            "type": "ProjectAutomata.Factory",
+            "object": {
+                "initialRecipe": "ToyRobot",
+                "availableRecipes": ["ToyRobot"],
+                "productionSpeed": 1,
+                "productionAnalysisItemDef": "UnitsProduced",
+                "efficiencyAnalysisItemDef": "BuildingEfficiency",
+                "productIconPrefab": "ProductIcon",
+                "productIconUpdaterInterval": 1
+            }
+        },
+        { "type": "ProjectAutomata.ProductSpecificProductStorage", "object": { "slots": 40 } },
+        { "type": "ProjectAutomata.BuildingRequirementController", "object": {} },
+        {
+            "type": "ProjectAutomata.Upkeep",
+            "object": {
+                "monthlyUpkeep": "Upkeep",
+                "minUpkeep": 0.25,
+                "requireCanWorkState": true,
+                "onlyIfUserEnabled": true,
+                "upkeepAnalysisItemDef": "BuildingUpkeep",
+                "uptimeAnalysisItemDef": "Uptime"
+            }
+        },
+        { "type": "ProjectAutomata.BuildingLogistics", "object": {} },
+        { "type": "ProjectAutomata.RecipeUserRequireRecipeSelected", "object": {} },
+        { "type": "ProjectAutomata.BuildingRequirementStorageSpace", "object": {} },
+        {
+            "type": "ProjectAutomata.JITVehicleFleet",
+            "object": { "vehiclePrefab": "ToyTruck", "initialVehicleAmount": 5, "infiniteAmount": true, "maximumVehicleAmount": 0 }
+        },
+        {
+            "type": "ProjectAutomata.PolluterBuilding",
+            "object": { "pollutionRate": 0.08, "aiPollutionFactor": 0.75, "efficiencyFormulaName": "Pollution Rate Efficiency" }
+        }
+    ]
+}

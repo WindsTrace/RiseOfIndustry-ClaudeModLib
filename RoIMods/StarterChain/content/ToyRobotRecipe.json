@@ -1,0 +1,20 @@
+{
+    "type": "ProjectAutomata.Recipe",
+    "object": {
+        "name": "ToyRobot",
+        "displayName": "Toy Robot",
+        "svgIcon": "toyrobot",
+        "gameDays": 40,
+        "excludeInRecipeGraph": false,
+        "usedByWaterResourceHarvester": false,
+        "requiredModules": [],
+        "requiredResourceNodeProducts": [],
+        "ingredients": [
+            { "productName": "Steel", "amount": 2 },
+            { "productName": "LightBulb", "amount": 1 }
+        ],
+        "result": [
+            { "productName": "ToyRobot", "amount": 1 }
+        ]
+    }
+}

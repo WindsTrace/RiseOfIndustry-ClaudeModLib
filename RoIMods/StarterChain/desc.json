@@ -1,0 +1,8 @@
+{
+    "author": "Claude (Anthropic)",
+    "name": "StarterChain",
+    "description": "Example production chain: Toy Robot (2 Steel + 1 Light Bulb) made in a new Toy Robot Workshop, researched on a new Robotics tech-tree page.",
+    "version": 2,
+    "versionString": "0.2.0",
+    "dependencies": ["ClaudeModLib"]
+}

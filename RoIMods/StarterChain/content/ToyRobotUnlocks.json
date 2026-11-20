@@ -1,0 +1,17 @@
+{
+    "type": "ProjectAutomata.TechTreeBuildingUnlock",
+    "object": {
+        "name": "ToyRobotWorkshopUnlock",
+        "displayName": "Toy Robot Workshop",
+        "description": "Unlocks the Toy Robot Workshop.",
+        "svgIcon": "toyrobot",
+        "unlockedByDefault": false,
+        "tier": 2,
+        "requiredUnlocks": ["Steel", "Light Bulb"],
+        "includedUnlocks": [],
+        "trees": [{ "tree": "Robotics", "column": 2 }],
+        "researchCost": "Research Cost",
+        "researchTime": "Research Time",
+        "building": "ToyRobotWorkshop"
+    }
+}

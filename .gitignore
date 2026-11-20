@@ -1,0 +1,11 @@
+# Build outputs (publish DLLs via GitHub Releases, not in git)
+*/code/
+RoIMods/*/code/
+*.pdb
+
+# Generated
+RoIMods/StarterChain/assets/toyrobot_tex.png
+
+# Never commit game files
+Assembly-CSharp*.dll
+UnityEngine*.dll

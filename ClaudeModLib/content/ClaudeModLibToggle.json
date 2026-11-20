@@ -1,0 +1,13 @@
+{
+    "type": "ProjectAutomata.ContentCreationModels.CCInputButtonModel",
+    "object": {
+        "name": "ClaudeModLibToggle",
+        "category": "UI",
+        "displayName": "ClaudeModLib: toggle mod panel",
+        "description": "Opens or closes the ClaudeModLib panel (mod list and feature switches).",
+        "uiOrder": 1000,
+        "sensitivity": 1,
+        "debugButton": false,
+        "keys": [ { "keyCode": "F9" } ]
+    }
+}

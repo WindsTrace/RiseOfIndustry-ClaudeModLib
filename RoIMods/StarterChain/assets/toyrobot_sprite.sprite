@@ -1,0 +1,6 @@
+{
+  "textureName": "toyrobot_tex",
+  "rectPos": { "x": 0, "y": 0 },
+  "rectSize": { "x": 128, "y": 128 },
+  "pivot": { "x": 0.5, "y": 0.5 }
+}
