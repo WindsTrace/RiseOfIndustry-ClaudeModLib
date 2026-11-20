@@ -9,14 +9,14 @@ namespace ClaudeModLib
     {
         static int _nextId = 0x434D4C00;
         public readonly int id = _nextId++;
-        public string title;
+        public LocText title;
         public Rect rect;
         public readonly Action<LibWindow> draw;
         public readonly Feature visibleWhen;
         public readonly bool alsoInMenus;
         public Vector2 scroll;
 
-        internal LibWindow(string title, Rect rect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus)
+        internal LibWindow(LocText title, Rect rect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus)
         { this.title = title; this.rect = rect; this.draw = draw; this.visibleWhen = visibleWhen; this.alsoInMenus = alsoInMenus; }
 
         public bool visible { get { return (visibleWhen == null || visibleWhen.enabled) && (alsoInMenus || ModLib.inGame); } }
@@ -103,7 +103,7 @@ namespace ClaudeModLib
             if (ModLib.inGame && !Toolbar.installed)
             {
                 float w = Screen.width / s;
-                if (GUI.Button(new Rect(w - 110, 60, 100, 26), "Mods ▾", Ui.button)) LibPanel.visible = !LibPanel.visible;
+                if (GUI.Button(new Rect(w - 110, 60, 100, 26), Lang.T("Mods ▾", "模组 ▾"), Ui.button)) LibPanel.visible = !LibPanel.visible;
             }
 
             foreach (var m in mods)
@@ -114,9 +114,9 @@ namespace ClaudeModLib
                         win.rect = GUI.Window(win.id, win.rect, id =>
                         {
                             try { captured.draw(captured); }
-                            catch (Exception e) { GUILayout.Label("error: " + e.Message, Ui.small); }
+                            catch (Exception e) { GUILayout.Label(Lang.T("error: ", "出错：") + e.Message, Ui.small); }
                             GUI.DragWindow(new Rect(0, 0, 10000, 22));
-                        }, win.title);
+                        }, win.title != null ? win.title.text : "");
                     }
 
             if (LibPanel.visible) LibPanel.Draw(mods);
@@ -139,54 +139,78 @@ namespace ClaudeModLib
             _rect = GUI.Window(0x434D4BFF, _rect, id => DrawContent(mods), "ClaudeModLib " + ModLib.Version);
         }
 
+        static string Txt(LocText t) { return t != null ? t.text : null; }
+
+        static void LangButton(LangMode m, string text)
+        {
+            var old = GUI.backgroundColor;
+            if (Lang.mode == m) GUI.backgroundColor = Ui.Green;
+            if (GUILayout.Button(text, Ui.button)) Lang.mode = m;
+            GUI.backgroundColor = old;
+        }
+
         static void DrawContent(List<ModHandle> mods)
         {
             if (_entries == null || Time.unscaledTime > _nextRefresh) { _entries = Mods.List(); _nextRefresh = Time.unscaledTime + 2f; }
             _scroll = GUILayout.BeginScrollView(_scroll);
 
-            GUILayout.Label("功能开关", Ui.header);
+            // Language
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(Lang.T("Language", "语言") + ":", Ui.bold, GUILayout.Width(80));
+            LangButton(LangMode.Auto, Lang.T("Auto (game)", "自动（跟随游戏）"));
+            LangButton(LangMode.English, "English");
+            LangButton(LangMode.ChineseSimplified, "简体中文");
+            GUILayout.EndHorizontal();
+            GUILayout.Space(6);
+
+            GUILayout.Label(Lang.T("Features", "功能开关"), Ui.header);
             foreach (var m in mods)
             {
                 if (m.features.Count == 0) continue;
-                GUILayout.Label(m.displayName, Ui.bold);
+                GUILayout.Label(Txt(m.displayName), Ui.bold);
                 foreach (var f in m.features)
                 {
-                    bool v = GUILayout.Toggle(f.enabled, " " + f.label, Ui.label);
+                    bool v = GUILayout.Toggle(f.enabled, " " + Txt(f.label), Ui.label);
                     if (v != f.enabled) f.enabled = v;
-                    if (!string.IsNullOrEmpty(f.description)) GUILayout.Label("    " + f.description, Ui.small);
+                    var desc = Txt(f.description);
+                    if (!string.IsNullOrEmpty(desc)) GUILayout.Label("    " + desc, Ui.small);
                 }
             }
 
             GUILayout.Space(8);
-            GUILayout.Label("Mod 列表（启用/禁用在下次启动游戏时生效）", Ui.header);
+            GUILayout.Label(Lang.T("Mods (enable/disable applies on next game start)", "Mod 列表（启用/禁用在下次启动游戏时生效）"), Ui.header);
             foreach (var e in _entries)
             {
                 GUILayout.BeginHorizontal();
-                Ui.ColoredLabel(e.loaded ? "● 已加载" : "○ 未加载", e.loaded ? Ui.Green : Ui.Grey, GUILayout.Width(80));
+                Ui.ColoredLabel(e.loaded ? Lang.T("● loaded", "● 已加载") : Lang.T("○ not loaded", "○ 未加载"),
+                    e.loaded ? Ui.Green : Ui.Grey, GUILayout.Width(95));
                 GUILayout.Label(e.name + "  " + (e.versionString ?? "") + (e.usesLib ? "  ★" : ""), Ui.label);
                 GUILayout.FlexibleSpace();
-                bool next = GUILayout.Toggle(e.enabledNextLaunch, " 下次启用", Ui.label, GUILayout.Width(90));
+                bool next = GUILayout.Toggle(e.enabledNextLaunch, Lang.T(" next start", " 下次启用"), Ui.label, GUILayout.Width(95));
                 if (next != e.enabledNextLaunch)
                 {
-                    if (e.name == ModLib.ModName && !next) _status = "ClaudeModLib 被禁用后，依赖它的 mod 也无法工作。";
+                    if (e.name == ModLib.ModName && !next)
+                        _status = Lang.T("Without ClaudeModLib, mods that depend on it will not work.", "ClaudeModLib 被禁用后，依赖它的 mod 也无法工作。");
                     Mods.SetEnabledNextLaunch(e.name, next);
                     _entries = Mods.List();
                 }
                 GUILayout.EndHorizontal();
             }
-            GUILayout.Label("★ = 使用 ClaudeModLib 的 mod", Ui.small);
+            GUILayout.Label(Lang.T("★ = uses ClaudeModLib", "★ = 使用 ClaudeModLib 的 mod"), Ui.small);
 
             GUILayout.Space(8);
-            GUILayout.Label("开发工具", Ui.header);
-            if (GUILayout.Button("导出全部游戏资源名 → claudemodlib_asset_dump.txt", Ui.button))
+            GUILayout.Label(Lang.T("Developer tools", "开发工具"), Ui.header);
+            if (GUILayout.Button(Lang.T("Dump all game asset names → claudemodlib_asset_dump.txt", "导出全部游戏资源名 → claudemodlib_asset_dump.txt"), Ui.button))
             {
-                try { _status = "已写入：" + DevTools.DumpAssets(); } catch (Exception ex) { _status = "导出失败：" + ex.Message; }
+                try { _status = Lang.T("Written: ", "已写入：") + DevTools.DumpAssets(); }
+                catch (Exception ex) { _status = Lang.T("Dump failed: ", "导出失败：") + ex.Message; }
             }
-            GUILayout.Label("面板快捷键：" + Hotkeys.Describe(Hotkeys.LibToggle) + "（可在游戏设置的按键绑定里修改）", Ui.small);
+            GUILayout.Label(Lang.T("Panel hotkey: ", "面板快捷键：") + Hotkeys.Describe(Hotkeys.LibToggle)
+                + Lang.T(" (rebind it in the game's key-binding settings)", "（可在游戏设置的按键绑定里修改）"), Ui.small);
             if (_status != null) GUILayout.Label(_status, Ui.small);
 
             GUILayout.EndScrollView();
-            if (GUILayout.Button("关闭", Ui.button)) visible = false;
+            if (GUILayout.Button(Lang.T("Close", "关闭"), Ui.button)) visible = false;
             GUI.DragWindow(new Rect(0, 0, 10000, 22));
         }
     }

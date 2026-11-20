@@ -32,12 +32,13 @@ namespace ClaudeModLib
     {
         public readonly ModHandle owner;
         public readonly string id;
-        public string label;
-        public string description;
+        /// <summary>Bilingual label/description; read <c>label.text</c> for the current language.</summary>
+        public LocText label;
+        public LocText description;
         bool _enabled;
         public event Action<bool> changed;
 
-        internal Feature(ModHandle owner, string id, string label, bool defaultOn)
+        internal Feature(ModHandle owner, string id, LocText label, bool defaultOn)
         {
             this.owner = owner; this.id = id; this.label = label;
             _enabled = PlayerPrefs.GetInt(PrefKey, defaultOn ? 1 : 0) == 1;
@@ -65,14 +66,17 @@ namespace ClaudeModLib
     {
         public readonly string name;
         public readonly Mod mod;
-        public string displayName;
+        public LocText displayName;
         internal readonly List<Feature> features = new List<Feature>();
         internal readonly List<LibWindow> windows = new List<LibWindow>();
 
-        internal ModHandle(Mod mod, string name, string displayName) { this.mod = mod; this.name = name; this.displayName = displayName; }
+        internal ModHandle(Mod mod, string name, LocText displayName) { this.mod = mod; this.name = name; this.displayName = displayName; }
 
-        /// <summary>Adds an on/off switch shown in the ClaudeModLib panel. State is persisted.</summary>
-        public Feature AddFeature(string id, string label, bool defaultOn, string description = null)
+        /// <summary>
+        /// Adds an on/off switch shown in the ClaudeModLib panel. State is persisted.
+        /// Labels accept a plain string or a bilingual <see cref="LocText"/>: <c>LocText.Of("Show window", "显示窗口")</c>.
+        /// </summary>
+        public Feature AddFeature(string id, LocText label, bool defaultOn, LocText description = null)
         {
             var f = new Feature(this, id, label, defaultOn);
             f.description = description;
@@ -84,7 +88,7 @@ namespace ClaudeModLib
         /// Adds a draggable IMGUI window drawn with <paramref name="draw"/> while <paramref name="visibleWhen"/> is enabled.
         /// The window only shows inside a running game (not in menus) unless <paramref name="alsoInMenus"/> is true.
         /// </summary>
-        public LibWindow AddWindow(string title, Rect initialRect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus = false)
+        public LibWindow AddWindow(LocText title, Rect initialRect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus = false)
         {
             var w = new LibWindow(title, initialRect, draw, visibleWhen, alsoInMenus);
             windows.Add(w);
@@ -95,7 +99,7 @@ namespace ClaudeModLib
     /// <summary>Static entry point of the library.</summary>
     public static class ModLib
     {
-        public const string Version = "0.1.0";
+        public const string Version = "0.2.0";
         public const string ModName = "ClaudeModLib";
 
         static ClaudeModLibMod _instance;
@@ -113,11 +117,11 @@ namespace ClaudeModLib
         public static bool inGame { get; private set; }
 
         /// <summary>Registers a mod with the lib panel. Call from your Mod.OnModWasLoaded or OnAllModsLoaded.</summary>
-        public static ModHandle Register(Mod mod, string displayName = null)
+        public static ModHandle Register(Mod mod, LocText displayName = null)
         {
             string name = ModNameOf(mod);
             foreach (var h in _mods) if (h.name == name) return h;
-            var handle = new ModHandle(mod, name, displayName ?? name);
+            var handle = new ModHandle(mod, name, displayName ?? (LocText)name);
             _mods.Add(handle);
             Log.Info("registered mod " + name);
             return handle;

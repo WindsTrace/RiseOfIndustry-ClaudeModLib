@@ -1,5 +1,5 @@
 // CityProgress: window showing each city's tier and population progress towards the next tier.
-// Built on ClaudeModLib: switch it on in the ClaudeModLib panel (toolbar button), no hotkey of its own.
+// Built on ClaudeModLib: switch it on in the ClaudeModLib panel (toolbar button). English / 简体中文 via Lang.
 using System.Collections.Generic;
 using ClaudeModLib;
 using ProjectAutomata;
@@ -19,10 +19,10 @@ namespace CityProgress
         public override void OnModWasLoaded()
         {
             base.OnModWasLoaded();
-            var handle = ModLib.Register(this, "城市升级进度");
-            _show = handle.AddFeature("window", "显示城市升级进度窗口", true);
-            _onlyMine = handle.AddFeature("onlyMine", "只显示我供过货的城市", true);
-            handle.AddWindow("城市升级进度", new Rect(20, 120, 620, 320), DrawWindow, _show);
+            var handle = ModLib.Register(this, LocText.Of("City progress", "城市升级进度"));
+            _show = handle.AddFeature("window", LocText.Of("Show city progress window", "显示城市升级进度窗口"), true);
+            _onlyMine = handle.AddFeature("onlyMine", LocText.Of("Only cities I have supplied", "只显示我供过货的城市"), true);
+            handle.AddWindow(LocText.Of("City progress", "城市升级进度"), new Rect(20, 120, 620, 320), DrawWindow, _show);
         }
 
         void Update()
@@ -42,7 +42,8 @@ namespace CityProgress
 
         void DrawWindow(LibWindow w)
         {
-            GUILayout.Label("每 " + RefreshSeconds + " 秒刷新；人口每 15 天随商店消耗结算一次", Ui.small);
+            GUILayout.Label(Lang.T("Refreshes every " + RefreshSeconds + " s; population settles every 15 days as shops consume goods",
+                                   "每 " + RefreshSeconds + " 秒刷新；人口每 15 天随商店消耗结算一次"), Ui.small);
             w.scroll = GUILayout.BeginScrollView(w.scroll, GUILayout.Height(w.rect.height - 60));
             int shown = 0;
             foreach (var r in _rows)
@@ -52,7 +53,10 @@ namespace CityProgress
                 DrawRow(r);
             }
             if (shown == 0)
-                GUILayout.Label(_onlyMine.enabled ? "还没有向任何城市供过货。可在 ClaudeModLib 面板关闭“只显示我供过货的城市”。" : "没有城市数据。", Ui.label);
+                GUILayout.Label(_onlyMine.enabled
+                    ? Lang.T("You have not supplied any city yet. Turn off \"Only cities I have supplied\" in the ClaudeModLib panel to see all.",
+                             "还没有向任何城市供过货。可在 ClaudeModLib 面板关闭“只显示我供过货的城市”。")
+                    : Lang.T("No city data.", "没有城市数据。"), Ui.label);
             GUILayout.EndScrollView();
         }
 
@@ -69,9 +73,10 @@ namespace CityProgress
             GUILayout.EndHorizontal();
             Ui.ProgressBar(r.progress, color);
             GUILayout.Label(r.nextTier != null
-                ? string.Format("人口 {0}  /  下一级门槛 {1}   （{2:0.0}%，还差 {3}）",
+                ? string.Format(Lang.T("Population {0}  /  next tier at {1}   ({2:0.0}%, {3} to go)",
+                                       "人口 {0}  /  下一级门槛 {1}   （{2:0.0}%，还差 {3}）"),
                     Ui.Number(r.population), Ui.Number(r.nextTierThreshold), r.progress * 100f, Ui.Number(r.remaining))
-                : "人口 " + Ui.Number(r.population), Ui.small);
+                : Lang.T("Population ", "人口 ") + Ui.Number(r.population), Ui.small);
             GUILayout.EndVertical();
         }
 
@@ -79,13 +84,13 @@ namespace CityProgress
         {
             switch (s)
             {
-                case CityStatus.Growing: text = "成长中"; color = Ui.Green; break;
-                case CityStatus.LimitReached: text = "已封顶·待触发升级"; color = Ui.Yellow; break;
-                case CityStatus.WaitingForSponsor: text = "已封顶·等待赞助（无人持有该区许可证）"; color = Ui.Orange; break;
-                case CityStatus.Advancing: text = "升级任务进行中"; color = Ui.Yellow; break;
-                case CityStatus.MaxTier: text = "最高等级"; color = Ui.Blue; break;
-                case CityStatus.Dead: text = "已废弃"; color = Color.gray; break;
-                default: text = "停滞（缺少商品供应）"; color = Ui.Grey; break;
+                case CityStatus.Growing: text = Lang.T("Growing", "成长中"); color = Ui.Green; break;
+                case CityStatus.LimitReached: text = Lang.T("At limit · upgrade pending", "已封顶·待触发升级"); color = Ui.Yellow; break;
+                case CityStatus.WaitingForSponsor: text = Lang.T("At limit · waiting for sponsor (nobody owns the region permit)", "已封顶·等待赞助（无人持有该区许可证）"); color = Ui.Orange; break;
+                case CityStatus.Advancing: text = Lang.T("Upgrade contracts in progress", "升级任务进行中"); color = Ui.Yellow; break;
+                case CityStatus.MaxTier: text = Lang.T("Max tier", "最高等级"); color = Ui.Blue; break;
+                case CityStatus.Dead: text = Lang.T("Abandoned", "已废弃"); color = Color.gray; break;
+                default: text = Lang.T("Stagnant (not enough goods)", "停滞（缺少商品供应）"); color = Ui.Grey; break;
             }
         }
     }

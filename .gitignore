@@ -2,6 +2,7 @@
 */code/
 RoIMods/*/code/
 *.pdb
+dist/
 
 # Generated
 RoIMods/StarterChain/assets/toyrobot_tex.png

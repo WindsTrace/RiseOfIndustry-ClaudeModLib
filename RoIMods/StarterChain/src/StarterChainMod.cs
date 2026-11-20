@@ -23,9 +23,11 @@ namespace StarterChain
         public override void OnModWasLoaded()
         {
             base.OnModWasLoaded();
-            var handle = ModLib.Register(this, "示例生产链 (Toy Robot)");
-            _guaranteeListing = handle.AddFeature("guaranteeListing", "保证玩具店上架 Toy Robot（下次进入游戏生效）", true,
-                "把 ToyStore 的上架上限从 8 提到全部候选数；会改变原版平衡");
+            var handle = ModLib.Register(this, LocText.Of("Example chain (Toy Robot)", "示例生产链 (Toy Robot)"));
+            _guaranteeListing = handle.AddFeature("guaranteeListing",
+                LocText.Of("Guarantee Toy Stores list Toy Robot (applies on next game start)", "保证玩具店上架 Toy Robot（下次启动游戏生效）"), true,
+                LocText.Of("Raises ToyStore's product limit from 8 to all candidates; changes vanilla balance",
+                           "把 ToyStore 的上架上限从 8 提到全部候选数；会改变原版平衡"));
 
             // Before content loads, so the JSON unlock can reference the building by name.
             _building = Content.CloneBuilding("ToyFactory", BuildingName, b =>

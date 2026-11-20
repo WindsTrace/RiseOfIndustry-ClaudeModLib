@@ -1,4 +1,4 @@
-# ClaudeModLib API reference (v0.1.0)
+# ClaudeModLib API reference (v0.2.0)
 
 Namespace `ClaudeModLib`. Target: Rise of Industry 2.3.x (Unity 2018.4, Mono, .NET 4.x).
 Everything here was verified against the game's own code; see [GameMechanics.md](GameMechanics.md) for the why.
@@ -16,7 +16,7 @@ To use it, add the dependency in your `desc.json` (this makes the game load the 
 
 | Member | Description |
 |---|---|
-| `ModHandle ModLib.Register(Mod mod, string displayName = null)` | Registers your mod with the lib panel. Call in `OnModWasLoaded`. Returns the same handle if called twice. |
+| `ModHandle ModLib.Register(Mod mod, LocText displayName = null)` | Registers your mod with the lib panel. Call in `OnModWasLoaded`. Returns the same handle if called twice. |
 | `void ModLib.OnAllModsLoaded(Action)` | Run once all mods and their content are loaded (immediately if already done). |
 | `void ModLib.OnGameReady(Action)` | Run when a game world is running (map loaded) — the place to touch scene UI. |
 | `bool ModLib.inGame` | True while a map is running (a `SettlementManager` exists). |
@@ -28,12 +28,37 @@ To use it, add the dependency in your `desc.json` (this makes the game load the 
 
 | Member | Description |
 |---|---|
-| `Feature AddFeature(string id, string label, bool defaultOn, string description = null)` | An on/off switch in the lib panel. State persists in PlayerPrefs (`ClaudeModLib.<mod>.<id>`). |
-| `LibWindow AddWindow(string title, Rect rect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus = false)` | A draggable IMGUI window, drawn while `visibleWhen.enabled` and a game is running. Coordinates are in 1080p units (scaled automatically). |
+| `Feature AddFeature(string id, LocText label, bool defaultOn, LocText description = null)` | An on/off switch in the lib panel. State persists in PlayerPrefs (`ClaudeModLib.<mod>.<id>`). |
+| `LibWindow AddWindow(LocText title, Rect rect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus = false)` | A draggable IMGUI window, drawn while `visibleWhen.enabled` and a game is running. Coordinates are in 1080p units (scaled automatically). |
+
+All `LocText` parameters also accept a plain `string` (same text in every language).
 
 ### Feature
 
-`bool enabled { get; set; }` (persisted) · `event Action<bool> changed` · `string label, description`.
+`bool enabled { get; set; }` (persisted) · `event Action<bool> changed` · `LocText label, description`.
+
+---
+
+## Lang / LocText — English & 简体中文
+
+The lib panel has a language switch: **Auto** (default: follows the game, `GameOptions.language.keycode`
+starting with `zh` → Chinese, anything else → English), **English**, **简体中文**. Stored in PlayerPrefs
+`ClaudeModLib.language`. Use it so non-Chinese players never see Chinese text.
+
+| Member | Description |
+|---|---|
+| `string Lang.T(string en, string zh)` | Text for the current language (falls back to English when `zh` is null). Call it while drawing, so switching applies immediately. |
+| `bool Lang.isChinese` | Current effective language. |
+| `LangMode Lang.mode { get; set; }` | `Auto`, `English`, `ChineseSimplified` (setting it is what the panel does). |
+| `string Lang.gameLanguageCode` | The game's language code (`"en"`, `"zh-Hans"`, `"de"` …). |
+| `event Action Lang.changed` | Raised when the player switches language. |
+| `Lang.Add(key, en, zh)` / `string Lang.Get(key)` | Optional keyed string table. |
+| `new LocText(en, zh)` / `LocText.Of(en, zh)` / `.text` | Bilingual text for labels and titles; strings convert implicitly. |
+
+```csharp
+GUILayout.Label(Lang.T("Population", "人口") + " " + Ui.Number(pop), Ui.label);
+var f = handle.AddFeature("x", LocText.Of("Show window", "显示窗口"), true);
+```
 
 ### Example
 
