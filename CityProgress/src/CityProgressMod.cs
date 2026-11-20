@@ -21,7 +21,8 @@ namespace CityProgress
         {
             base.OnModWasLoaded();
             var handle = ModLib.Register(this, LocText.Of("City progress", "城市升级进度"));
-            _show = handle.AddFeature("window", LocText.Of("Show city progress window", "显示城市升级进度窗口"), true);
+            // Off by default: the player opens it from the ClaudeModLib panel (the choice is then remembered).
+            _show = handle.AddFeature("window", LocText.Of("Show city progress window", "显示城市升级进度窗口"), false);
             _onlyMine = handle.AddFeature("onlyMine", LocText.Of("Only cities I have supplied", "只显示我供过货的城市"), true);
             handle.AddWindow(LocText.Of("City progress", "城市升级进度"), new Rect(20, 110, 380, 640), DrawWindow, _show);
         }
