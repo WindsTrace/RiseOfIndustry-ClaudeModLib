@@ -13,7 +13,18 @@ Not affiliated with Dapper Penguin Studios / Kasedo Games. No game files are inc
 
 ## Download / 下载
 
-Get the zips from the [**latest release**](../../releases/latest):
+**Steam Workshop (easiest / 最简单):** subscribe and you're done — CityProgress lists ClaudeModLib as a required item.
+订阅即可使用，订阅 CityProgress 时 Steam 会提示一起订阅 ClaudeModLib。
+
+| Workshop item | |
+|---|---|
+| [**ClaudeModLib** — modding toolkit](https://steamcommunity.com/sharedfiles/filedetails/?id=3843162963) | the toolkit / 工具包 |
+| [**CityProgress** — city upgrade progress](https://steamcommunity.com/sharedfiles/filedetails/?id=3843163232) | requires ClaudeModLib / 需要工具包 |
+
+Don't keep a manual copy in `Mods\` and a Workshop subscription of the same mod at the same time (same name → conflict).
+不要同时保留 `Mods\` 里的手动安装版和创意工坊订阅版（同名会冲突）。
+
+**Manual install / 手动安装** — get the zips from the [**latest release**](../../releases/latest):
 
 | File | Contents | |
 |---|---|---|
@@ -29,8 +40,9 @@ Enabling mods disables Steam achievements (game rule). 启用 mod 会禁用成�
 
 ## Features / 功能
 
-- **Toolbar button + mod panel** — feature switches (persisted), list of all mods with loaded state and
-  enable/disable for the next launch, one-click dump of all game asset names.
+- **Toolbar button + mod panel** in the game's native look (cream / orange, editable `config/theme.json`) —
+  feature switches, list of all mods with loaded state and enable/disable for the next launch, asset and UI dumps,
+  and an in-game **Steam Workshop publisher** for mod authors.
 - **Languages / 语言:** *Auto* (follows the game language), *English*, *简体中文* — switch in the panel.
   Non-Chinese players never see Chinese text. Mods built on the lib get the same switch via `Lang` / `LocText`.
 - **Rebindable hotkeys** through the game's own input system.
@@ -97,6 +109,6 @@ dependency, and installs into the game's `Mods` folder.
 
 ## Status
 
-- Verified: all mods load without errors in 2.3.3; lib hotkey registers with the game's InputManager;
-  StarterChain building/tech tree/shop listing work through the lib API (checked via asset dump and logs).
-- Needs in-game confirmation: toolbar button placement/icon, panel and window behaviour during play.
+- Tested in Rise of Industry 2.3.3: toolbar button, mod panel, themes, languages, hotkeys, CityProgress window
+  and the in-game Workshop publisher (both Workshop items were uploaded with it).
+- StarterChain (example production chain) is verified via asset dumps and logs; play-testing of its factory is pending.

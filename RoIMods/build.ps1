@@ -1,6 +1,7 @@
 # Builds and installs Rise of Industry mods from this folder.
-# Usage:  powershell -ExecutionPolicy Bypass -File build.ps1 [-Mods StarterChain,AssetDump]
-param([string[]]$Mods = @('StarterChain'))
+# Usage:  powershell -ExecutionPolicy Bypass -File build.ps1 [-Mods StarterChain,AssetDump] [-NoInstall]
+#   -NoInstall: compile only (the game may keep running; used by package.ps1)
+param([string[]]$Mods = @('StarterChain'), [switch]$NoInstall)
 
 $ErrorActionPreference = 'Stop'
 $Mods = $Mods | ForEach-Object { $_ -split ',' } | Where-Object { $_ }
@@ -56,6 +57,8 @@ foreach ($mod in $Mods) {
             "/out:$(Join-Path $src "code\$mod.dll")" $modRefs ($cs | ForEach-Object FullName)
         if ($LASTEXITCODE -ne 0) { throw "compile failed: $mod" }
     }
+
+    if ($NoInstall) { continue }
 
     # 3. Install: copy desc.json, code, assets, content into <Game>\Mods\<mod>
     $dst = Join-Path $Game "Mods\$mod"

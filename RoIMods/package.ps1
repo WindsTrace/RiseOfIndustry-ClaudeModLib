@@ -6,8 +6,8 @@ $ErrorActionPreference = 'Stop'
 $Repo = Split-Path $PSScriptRoot -Parent
 $Dist = Join-Path $Repo 'dist'
 
-# Build everything first (also installs into the local game; close the game before running).
-& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'build.ps1') -Mods 'ClaudeModLib,CityProgress,StarterChain'
+# Compile everything first (compile only: the game may keep running).
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'build.ps1') -Mods 'ClaudeModLib,CityProgress,StarterChain' -NoInstall
 if ($LASTEXITCODE -ne 0) { throw 'build failed' }
 
 $ver = (Get-Content (Join-Path $Repo 'ClaudeModLib\desc.json') -Raw | ConvertFrom-Json).versionString
