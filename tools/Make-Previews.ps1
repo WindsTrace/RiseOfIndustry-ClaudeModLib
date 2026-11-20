@@ -52,31 +52,42 @@ function Rounded([single]$x, [single]$y, [single]$w, [single]$h, [single]$r) {
 $b, $g = New-Canvas
 Header $g 'ClaudeModLib' 'Rise of Industry modding toolkit'
 $g.FillPath((Brush $orange), (Rounded 136 136 240 240 28))
-Fill-SvgPaths $g (Join-Path $Repo 'ClaudeModLib\assets\claudemodlib.svg') 160 160 3.5 $cream
+# icon is 64x64 scaled 3.5 = 224 px; centre it in the 240 px square at 136..376 -> offset 256 - 112 = 144
+Fill-SvgPaths $g (Join-Path $Repo 'ClaudeModLib\assets\claudemodlib.svg') 144 144 3.5 $cream
 $g.DrawString('Mod panel · Themes · Hotkeys · API', (& $fBody 24), (Brush $text), 256, 408, (New-Object Drawing.StringFormat -Property @{ Alignment = 'Center' }))
 $g.DrawString('English / 简体中文', (& $fZh 22), (Brush $sub), 256, 446, (New-Object Drawing.StringFormat -Property @{ Alignment = 'Center' }))
 $g.Dispose(); $b.Save((Join-Path $out 'ClaudeModLib.png'), [Drawing.Imaging.ImageFormat]::Png); $b.Dispose()
 
-# --- CityProgress (illustrative mock of the panel) ---------------------------------------------
+# --- CityProgress: replica of the in-game window (English UI, CityProgress 0.4.0) ---------------
+# Values are illustrative; texts and layout match CityProgressMod.cs (title bar + ×, section bar, cards).
 $b, $g = New-Canvas
-Header $g 'CityProgress' 'City upgrade progress  ·  城市升级进度'
+$fmtR = New-Object Drawing.StringFormat -Property @{ Alignment = 'Far' }
+$g.FillRectangle((Brush $brown), 0, 0, 512, 48)
+$g.DrawString('City progress', (& $fBold 26), (Brush $cream), 16, 9)
+$g.DrawString('×', (& $fBold 30), (Brush $orange), 496, 4, $fmtR)
+$g.FillRectangle((Brush $orange), 12, 60, 488, 36)
+$g.DrawString('All cities  (3)', (& $fBold 22), (Brush $cream), 22, 65)
+$g.DrawString('Population settles every 15 days as shops consume goods.', (& $fBody 15), (Brush $sub), 14, 100)
+
 $cards = @(
-    @{ name = 'LORSBECK';  tier = 'Hamlet → Village'; pop = '91,426';  p = 0.62; st = 'Growing';  sc = '#4E8A2E' },
-    @{ name = 'MOOSEURACH'; tier = 'Village → Town';  pop = '238,450'; p = 0.79; st = 'Growing';  sc = '#4E8A2E' },
-    @{ name = 'DUISBURG';  tier = 'Town → City';      pop = '311,980'; p = 1.0;  st = 'Needs a sponsor'; sc = '#B3412E' }
+    @{ name = 'LORSBECK';   tier = 'Hamlet → Village'; pop = '91,426';  p = 0.621; st = 'Growing';                     sc = '#4E8A2E'; next = 'Next tier at 147.3k  ·  55.9k to go  ·  62.1%' },
+    @{ name = 'MOOSEURACH'; tier = 'Village → Town';   pop = '238,450'; p = 0.579; st = 'Stagnant (not enough goods)'; sc = '#C87A06'; next = 'Next tier at 301.2k  ·  62.8k to go  ·  57.9%' },
+    @{ name = 'DUISBURG';   tier = 'Town → City';      pop = '512,400'; p = 1.0;   st = 'At limit · needs a sponsor (region permit)'; sc = '#B3412E'; next = 'Next tier at 512.4k  ·  0 to go  ·  100.0%' }
 )
-$y = 120
+$y = 128; $x = 12; $w = 488; $h = 120
 foreach ($c in $cards) {
-    $g.FillRectangle((Brush $card), 24, $y, 464, 116)
-    $g.DrawRectangle((New-Object Drawing.Pen($orange, 3)), 24, $y, 464, 116)
-    $g.DrawString($c.name, (& $fBold 24), (Brush $text), 38, ($y + 8))
-    $fmtR = New-Object Drawing.StringFormat -Property @{ Alignment = 'Far' }
-    $g.DrawString($c.tier, (& $fBody 18), (Brush $sub), 474, ($y + 12), $fmtR)
-    $g.DrawString($c.pop, (& $fBold 34), (Brush $orange), 36, ($y + 38))
-    $g.DrawString($c.st, (& $fBody 20), (Brush (Col $c.sc)), 474, ($y + 50), $fmtR)
-    $g.FillRectangle((Brush $grey), 38, ($y + 88), 436, 12)
-    $g.FillRectangle((Brush (Col $c.sc)), 38, ($y + 88), [int](436 * $c.p), 12)
-    $y += 128
+    $g.FillRectangle((Brush $card), $x, $y, $w, $h)
+    $g.DrawRectangle((New-Object Drawing.Pen($orange, 2)), $x, $y, $w, $h)
+    $g.DrawString($c.name, (& $fBold 21), (Brush $text), ($x + 12), ($y + 6))
+    $g.DrawString($c.tier, (& $fBody 15), (Brush $sub), ($x + $w - 12), ($y + 10), $fmtR)
+    $g.DrawString('Population', (& $fBody 14), (Brush $sub), ($x + 12), ($y + 34))
+    $g.DrawString('Status', (& $fBody 14), (Brush $sub), ($x + 250), ($y + 34))
+    $g.DrawString($c.pop, (& $fBold 30), (Brush $orange), ($x + 10), ($y + 48))
+    $g.DrawString($c.st, (& $fBody 16), (Brush (Col $c.sc)), (New-Object Drawing.RectangleF(($x + 250), ($y + 49), ($w - 262), 38)))
+    $g.FillRectangle((Brush $grey), ($x + 12), ($y + 90), ($w - 24), 8)
+    $g.FillRectangle((Brush (Col $c.sc)), ($x + 12), ($y + 90), [int](($w - 24) * $c.p), 8)
+    $g.DrawString($c.next, (& $fBody 13), (Brush $sub), ($x + 12), ($y + 100))
+    $y += $h + 8
 }
 $g.Dispose(); $b.Save((Join-Path $out 'CityProgress.png'), [Drawing.Imaging.ImageFormat]::Png); $b.Dispose()
 
