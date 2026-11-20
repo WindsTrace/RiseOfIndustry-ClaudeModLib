@@ -170,7 +170,15 @@ Note the explicit model type: `"ProjectAutomata.InputButton"` fails ("model type
 
 `Ui.label, small, bold, header, button` (GUIStyles with a CJK-capable OS font) ·
 `Ui.ProgressBar(float value01, Color, float height = 14)` · `Ui.ColoredLabel(text, color)` ·
-`Ui.Number(int)` (`238400 → "238.4k"`) · colours `Ui.Green, Yellow, Orange, Blue, Grey` · `Ui.scale`.
+`Ui.Number(int)` (`238400 → "238.4k"`) · colours `Ui.Green, Yellow, Orange, Blue, Grey, Red` · `Ui.scale`.
+
+`bool Ui.Switch(bool value, string label, params GUILayoutOption[] labelOptions)` — on/off slider
+(green **ON/开**, red **OFF/关**) followed by a label in the same colour; clicking either flips it.
+Use it instead of `GUILayout.Toggle` so the state is obvious:
+
+```csharp
+_feature.enabled = Ui.Switch(_feature.enabled, Lang.T("Show window", "显示窗口"));
+```
 
 ## Reflect — private members
 

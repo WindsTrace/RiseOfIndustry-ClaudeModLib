@@ -27,8 +27,11 @@ namespace ClaudeModLib
     {
         public static GUIStyle label, small, bold, header, button;
         public static readonly Color Green = new Color(0.5f, 1f, 0.5f), Yellow = new Color(1f, 0.85f, 0.2f),
-            Orange = new Color(1f, 0.5f, 0.3f), Blue = new Color(0.6f, 0.8f, 1f), Grey = new Color(0.8f, 0.8f, 0.8f);
-        static GUIStyle _barBg, _barFill;
+            Orange = new Color(1f, 0.5f, 0.3f), Blue = new Color(0.6f, 0.8f, 1f), Grey = new Color(0.8f, 0.8f, 0.8f),
+            Red = new Color(1f, 0.45f, 0.45f);
+        static readonly Color SwitchOn = new Color(0.20f, 0.62f, 0.28f), SwitchOff = new Color(0.62f, 0.20f, 0.20f);
+        static GUIStyle _barBg, _barFill, _switchText, _clickLabel;
+        static Texture2D _white;
         static Font _font;
 
         /// <summary>UI scale relative to 1080p (windows are drawn in 1080p coordinates).</summary>
@@ -51,6 +54,43 @@ namespace ClaudeModLib
             }
             _barBg = new GUIStyle(GUI.skin.box); _barBg.normal.background = Solid(new Color(0.15f, 0.15f, 0.15f, 0.9f));
             _barFill = new GUIStyle(GUI.skin.box); _barFill.normal.background = Solid(Color.white);
+            _white = Solid(Color.white);
+            _switchText = new GUIStyle(small) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, fontSize = 11 };
+            _switchText.normal.textColor = Color.white;
+            _clickLabel = new GUIStyle(label) { alignment = TextAnchor.MiddleLeft };
+            _clickLabel.hover.textColor = Color.white;
+        }
+
+        /// <summary>
+        /// On/off switch: a green "ON" / red "OFF" slider followed by a label coloured the same way.
+        /// Clicking the switch or the label flips it. Returns the new value.
+        /// <code>f.enabled = Ui.Switch(f.enabled, "Show window");</code>
+        /// </summary>
+        public static bool Switch(bool value, string text, params GUILayoutOption[] labelOptions)
+        {
+            EnsureStyles();
+            GUILayout.BeginHorizontal();
+            var r = GUILayoutUtility.GetRect(54, 22, GUILayout.Width(54), GUILayout.Height(22));
+            Fill(r, new Color(0f, 0f, 0f, 0.55f));
+            Fill(new Rect(r.x + 1, r.y + 1, r.width - 2, r.height - 2), value ? SwitchOn : SwitchOff);
+            var knob = new Rect(value ? r.xMax - 20 : r.x + 2, r.y + 2, 18, r.height - 4);
+            Fill(knob, new Color(0.95f, 0.95f, 0.95f));
+            var stateRect = value ? new Rect(r.x + 2, r.y, r.width - 22, r.height) : new Rect(r.x + 20, r.y, r.width - 22, r.height);
+            GUI.Label(stateRect, value ? Lang.T("ON", "开") : Lang.T("OFF", "关"), _switchText);
+            bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none);
+
+            GUILayout.Space(6);
+            var old = GUI.contentColor; GUI.contentColor = value ? Green : Red;
+            var opts = labelOptions != null && labelOptions.Length > 0 ? labelOptions : new[] { GUILayout.Height(22) };
+            if (GUILayout.Button(text, _clickLabel, opts)) clicked = true;
+            GUI.contentColor = old;
+            GUILayout.EndHorizontal();
+            return clicked ? !value : value;
+        }
+
+        static void Fill(Rect r, Color c)
+        {
+            var o = GUI.color; GUI.color = c; GUI.DrawTexture(r, _white); GUI.color = o;
         }
 
         /// <summary>Horizontal progress bar filling the layout width.</summary>
@@ -170,10 +210,10 @@ namespace ClaudeModLib
                 GUILayout.Label(Txt(m.displayName), Ui.bold);
                 foreach (var f in m.features)
                 {
-                    bool v = GUILayout.Toggle(f.enabled, " " + Txt(f.label), Ui.label);
+                    bool v = Ui.Switch(f.enabled, Txt(f.label));
                     if (v != f.enabled) f.enabled = v;
                     var desc = Txt(f.description);
-                    if (!string.IsNullOrEmpty(desc)) GUILayout.Label("    " + desc, Ui.small);
+                    if (!string.IsNullOrEmpty(desc)) GUILayout.Label("              " + desc, Ui.small);
                 }
             }
 
@@ -183,10 +223,10 @@ namespace ClaudeModLib
             {
                 GUILayout.BeginHorizontal();
                 Ui.ColoredLabel(e.loaded ? Lang.T("● loaded", "● 已加载") : Lang.T("○ not loaded", "○ 未加载"),
-                    e.loaded ? Ui.Green : Ui.Grey, GUILayout.Width(95));
-                GUILayout.Label(e.name + "  " + (e.versionString ?? "") + (e.usesLib ? "  ★" : ""), Ui.label);
+                    e.loaded ? Ui.Green : Ui.Grey, GUILayout.Width(95), GUILayout.Height(22));
+                GUILayout.Label(e.name + "  " + (e.versionString ?? "") + (e.usesLib ? "  ★" : ""), Ui.label, GUILayout.Height(22));
                 GUILayout.FlexibleSpace();
-                bool next = GUILayout.Toggle(e.enabledNextLaunch, Lang.T(" next start", " 下次启用"), Ui.label, GUILayout.Width(95));
+                bool next = Ui.Switch(e.enabledNextLaunch, Lang.T("next start", "下次启用"), GUILayout.Width(80), GUILayout.Height(22));
                 if (next != e.enabledNextLaunch)
                 {
                     if (e.name == ModLib.ModName && !next)
