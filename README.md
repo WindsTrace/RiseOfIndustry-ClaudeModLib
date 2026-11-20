@@ -17,7 +17,7 @@ Get the zips from the [**latest release**](../../releases/latest):
 
 | File | Contents | |
 |---|---|---|
-| **`ClaudeModLib-v<ver>.zip`** | **Toolkit only** — the library and its panel. For players who want a clean base and for mod developers. 纯工具包。 | ⭐ default / 推荐 |
+| **`ClaudeModLib-v<ver>-toolkit.zip`** | **Toolkit only** — the library and its panel. For players who want a clean base and for mod developers. 纯工具包。 | ⭐ default / 推荐 |
 | `ClaudeModLib-v<ver>-with-mods.zip` | Toolkit **+ CityProgress + StarterChain** (the two example mods below). 工具包 + 两个示例 mod。 | optional / 可选 |
 
 **Install / 安装:** copy the folders from the zip into `<Steam>\steamapps\common\RiseOfIndustry\Mods\`

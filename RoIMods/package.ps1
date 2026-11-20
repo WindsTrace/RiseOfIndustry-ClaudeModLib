@@ -1,5 +1,5 @@
 # Builds the release zips into <repo>\dist (not committed; upload them to a GitHub Release):
-#   ClaudeModLib-v<ver>.zip            toolkit only (default download)
+#   ClaudeModLib-v<ver>-toolkit.zip    toolkit only (default download)
 #   ClaudeModLib-v<ver>-with-mods.zip  toolkit + CityProgress + StarterChain
 # Usage: powershell -ExecutionPolicy Bypass -File package.ps1
 $ErrorActionPreference = 'Stop'
@@ -58,5 +58,5 @@ function Make-Zip([string]$name, [string[]]$mods) {
 }
 
 New-Item -ItemType Directory -Force $Dist | Out-Null
-Make-Zip "ClaudeModLib-v$ver.zip" @('ClaudeModLib')
+Make-Zip "ClaudeModLib-v$ver-toolkit.zip" @('ClaudeModLib')   # "toolkit" sorts before "with-mods" on the release page
 Make-Zip "ClaudeModLib-v$ver-with-mods.zip" @('ClaudeModLib', 'CityProgress', 'StarterChain')
