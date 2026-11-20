@@ -180,17 +180,26 @@ Use it instead of `GUILayout.Toggle` so the state is obvious:
 _feature.enabled = Ui.Switch(_feature.enabled, Lang.T("Show window", "显示窗口"));
 ```
 
-`Ui.box` (themed row/box style) · `Rect Ui.Window(int id, Rect rect, string title, Action content)` — a themed,
-draggable window with title bar (what `ModHandle.AddWindow` uses).
+`Ui.box` (themed card style, orange-framed in the native theme) · `Ui.value` (large accent number, like the game's
+population figure) · `Ui.SectionHeader(string)` (full-width accent bar with title, like the game's orange
+"Farmers Market" headers) · `GUIStyle Ui.Colored(GUIStyle, Color)` (copy with replaced text colour — use this, not
+`GUI.contentColor`, which multiplies and turns dark on light themes) · `GUISkin Ui.skin` (themed skin; lib windows
+are drawn with it, so default GUILayout widgets and scrollbars match) ·
+`Rect Ui.Window(int id, Rect rect, string title, Action content)` — a themed, draggable window with title bar
+(what `ModHandle.AddWindow` uses).
 
 ## Theme — appearance (`ClaudeModLib/config/theme.json`)
 
 Every lib window uses the theme. Players/modders edit `<game>\Mods\ClaudeModLib\config\theme.json` and press
 **Reload theme** in the panel (no restart). `build.ps1` keeps an installed `config\` across rebuilds.
 
-Surfaces `window, titleBar, box, button, buttonHover, buttonActive, progressBackground` are either a flat colour
-`{ "color": "#1C2B21F0" }` or a **game sprite** with tint `{ "sprite": "<name>", "tint": "#FFFFFFFF" }` — the sprite
-is copied out of its atlas and keeps its 9-slice border. Text colours: `titleText, text, subtext, header, buttonText`;
+The shipped default reproduces the game's native look (cream `#F1EBDC` panels, orange `#C87A06` accents and
+frames, dark-brown title bar); `config/presets/green.json` is a dark alternative.
+
+Surfaces `window, titleBar, sectionHeader, box, button, buttonHover, buttonActive, progressBackground` are a flat
+colour `{ "color": "#F1EBDCFF" }`, optionally with an outline `"borderColor": "#C87A06FF", "borderWidth": 2`, or a
+**game sprite** with tint `{ "sprite": "<name>", "tint": "#FFFFFFFF" }` — the sprite is copied out of its atlas and
+keeps its 9-slice border. Text colours: `titleText, sectionHeaderText, text, subtext, header, buttonText`;
 switch: `switchOn, switchOff, switchKnob`; status: `good, bad, warn, info` (→ `Ui.Green/Red/Yellow/Blue`);
 `fonts` (OS font names, first found wins), `fontSize`, `titleBarHeight`. Comments (`//`) are allowed.
 

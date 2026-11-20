@@ -37,7 +37,10 @@ namespace ClaudeModLib
         public static Color Blue { get { return C(T.info, new Color(0.6f, 0.8f, 1f)); } }
         public static Color Grey { get { return C(T.subtext, new Color(0.8f, 0.8f, 0.8f)); } }
 
-        static GUIStyle _window, _titleBar, _titleText, _barBg, _barFill, _switchText, _clickLabel;
+        /// <summary>Large accent number style (like the game's "91,426"), and the section-header text style.</summary>
+        public static GUIStyle value, sectionText;
+        static GUIStyle _window, _titleBar, _titleText, _barBg, _barFill, _switchText, _clickLabel, _section;
+        static GUISkin _skin;
         static Texture2D _white;
         static Font _font;
         static string _fontKey;
@@ -48,11 +51,22 @@ namespace ClaudeModLib
         /// <summary>UI scale relative to 1080p (windows are drawn in 1080p coordinates).</summary>
         public static float scale { get { return Mathf.Max(1f, Screen.height / 1080f); } }
 
-        internal static void InvalidateStyles() { label = null; }
+        internal static void InvalidateStyles() { label = null; _colored.Clear(); }
+
+        static GUISkin _baseSkin;
 
         internal static void EnsureStyles()
         {
             if (label != null) return;
+            // Always derive from Unity's default skin, even if our themed skin is active right now.
+            if (_baseSkin == null) _baseSkin = GUI.skin;
+            var activeSkin = GUI.skin;
+            GUI.skin = _baseSkin;
+            try { BuildStyles(); } finally { GUI.skin = activeSkin; }
+        }
+
+        static void BuildStyles()
+        {
             var t = T;
             string fontKey = string.Join(",", t.fonts ?? new string[0]) + "@" + t.fontSize;
             if (_font == null || _fontKey != fontKey)
@@ -97,6 +111,47 @@ namespace ClaudeModLib
             _switchText.alignment = TextAnchor.MiddleCenter; _switchText.fontStyle = FontStyle.Bold;
             _clickLabel = Text(GUI.skin.label, fs, t.text);
             _clickLabel.alignment = TextAnchor.MiddleLeft;
+
+            value = Text(GUI.skin.label, fs + 6, t.header); value.fontStyle = FontStyle.Bold;
+            _section = new GUIStyle();
+            _section.normal.background = Theme.Texture(t.sectionHeader ?? t.button, out border); _section.border = border;
+            _section.margin = new RectOffset(0, 0, 6, 4);
+            sectionText = Text(GUI.skin.label, fs + 1, t.sectionHeaderText ?? t.buttonText);
+            sectionText.fontStyle = FontStyle.Bold; sectionText.alignment = TextAnchor.MiddleLeft;
+            sectionText.padding = new RectOffset(10, 10, 0, 0);
+
+            // Full skin used while drawing lib windows, so default GUILayout widgets (scrollbars, fields) match too.
+            // (the previous skin may still be active this frame, so it is not destroyed)
+            _skin = UnityEngine.Object.Instantiate(GUI.skin);
+            _skin.hideFlags = HideFlags.DontSave;
+            _skin.label = label; _skin.button = button; _skin.box = box; _skin.window = _window;
+            if (_font != null) _skin.font = _font;
+            var trackTex = Theme.Texture(t.progressBackground, out border);
+            var thumbTex = Theme.Texture(t.button, out border);
+            _skin.verticalScrollbar = new GUIStyle(GUI.skin.verticalScrollbar) { fixedWidth = 8 };
+            _skin.verticalScrollbar.normal.background = trackTex; _skin.verticalScrollbar.border = new RectOffset(0, 0, 0, 0);
+            _skin.verticalScrollbarThumb = new GUIStyle(GUI.skin.verticalScrollbarThumb) { fixedWidth = 8 };
+            _skin.verticalScrollbarThumb.normal.background = thumbTex; _skin.verticalScrollbarThumb.border = new RectOffset(0, 0, 0, 0);
+            _skin.horizontalScrollbar = new GUIStyle(GUI.skin.horizontalScrollbar) { fixedHeight = 8 };
+            _skin.horizontalScrollbar.normal.background = trackTex;
+            _skin.horizontalScrollbarThumb = new GUIStyle(GUI.skin.horizontalScrollbarThumb) { fixedHeight = 8 };
+            _skin.horizontalScrollbarThumb.normal.background = thumbTex;
+            _skin.textField = Text(GUI.skin.textField, fs, t.text);
+            _skin.textField.normal.background = _skin.textField.focused.background = Theme.Bordered(Color.white, Theme.Col(t.header, Color.gray), 1);
+            _skin.textField.border = new RectOffset(1, 1, 1, 1);
+        }
+
+        /// <summary>The themed GUISkin (valid after the first OnGUI). Lib windows are drawn with it.</summary>
+        public static GUISkin skin { get { EnsureStyles(); return _skin; } }
+
+        /// <summary>Full-width accent bar with a title (like the game's orange "Farmers Market" headers).</summary>
+        public static void SectionHeader(string text)
+        {
+            EnsureStyles();
+            var r = GUILayoutUtility.GetRect(new GUIContent(text), sectionText, GUILayout.Height(28), GUILayout.ExpandWidth(true));
+            r.y += 4; r.height -= 2;
+            GUI.Box(r, GUIContent.none, _section);
+            GUI.Label(r, text, sectionText);
         }
 
         static GUIStyle Text(GUIStyle baseStyle, int size, string colorHex)
@@ -147,10 +202,8 @@ namespace ClaudeModLib
             bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none);
 
             GUILayout.Space(6);
-            var old = GUI.contentColor; GUI.contentColor = value ? Green : Red;
             var opts = labelOptions != null && labelOptions.Length > 0 ? labelOptions : new[] { GUILayout.Height(22) };
-            if (GUILayout.Button(text, _clickLabel, opts)) clicked = true;
-            GUI.contentColor = old;
+            if (GUILayout.Button(text, Colored(_clickLabel, value ? Green : Red), opts)) clicked = true;
             GUILayout.EndHorizontal();
             return clicked ? !value : value;
         }
@@ -172,12 +225,28 @@ namespace ClaudeModLib
             GUI.backgroundColor = old;
         }
 
-        /// <summary>Label in a colour.</summary>
+        /// <summary>Label in a colour (text colour is replaced, not multiplied, so it works on light themes).</summary>
         public static void ColoredLabel(string text, Color color, params GUILayoutOption[] opts)
         {
-            var old = GUI.contentColor; GUI.contentColor = color;
-            GUILayout.Label(text, label, opts);
-            GUI.contentColor = old;
+            GUILayout.Label(text, Colored(label, color), opts);
+        }
+
+        static readonly Dictionary<string, GUIStyle> _colored = new Dictionary<string, GUIStyle>();
+
+        /// <summary>A cached copy of <paramref name="baseStyle"/> with its text colour set to <paramref name="color"/>.</summary>
+        public static GUIStyle Colored(GUIStyle baseStyle, Color color)
+        {
+            EnsureStyles();
+            string key = baseStyle.GetHashCode() + ColorUtility.ToHtmlStringRGBA(color);
+            GUIStyle s;
+            if (!_colored.TryGetValue(key, out s))
+            {
+                s = new GUIStyle(baseStyle);
+                s.normal.textColor = s.hover.textColor = s.active.textColor = s.focused.textColor = color;
+                s.wordWrap = true;
+                _colored[key] = s;
+            }
+            return s;
         }
 
         /// <summary>1234567 -> "1.23M", 238400 -> "238.4k".</summary>
@@ -201,6 +270,8 @@ namespace ClaudeModLib
             Ui.EnsureStyles();
             float s = Ui.scale;
             var oldMatrix = GUI.matrix;
+            var oldSkin = GUI.skin;
+            GUI.skin = Ui.skin;
             GUI.matrix = Matrix4x4.Scale(new Vector3(s, s, 1f));
 
             // Fallback launcher when the toolbar button could not be installed.
@@ -220,6 +291,7 @@ namespace ClaudeModLib
 
             if (LibPanel.visible) LibPanel.Draw(mods);
             GUI.matrix = oldMatrix;
+            GUI.skin = oldSkin;
         }
     }
 
@@ -227,7 +299,7 @@ namespace ClaudeModLib
     public static class LibPanel
     {
         public static bool visible;
-        static Rect _rect = new Rect(300, 100, 520, 520);
+        static Rect _rect = new Rect(300, 90, 560, 640);
         static Vector2 _scroll;
         static List<ModEntry> _entries;
         static float _nextRefresh;
@@ -243,8 +315,9 @@ namespace ClaudeModLib
         static void LangButton(LangMode m, string text)
         {
             var old = GUI.backgroundColor;
-            if (Lang.mode == m) GUI.backgroundColor = Ui.Green;
-            if (GUILayout.Button(text, Ui.button)) Lang.mode = m;
+            bool selected = Lang.mode == m;
+            if (!selected) GUI.backgroundColor = new Color(0.72f, 0.68f, 0.62f);   // unselected: muted, like inactive native tabs
+            if (GUILayout.Button(selected ? "✓ " + text : text, Ui.button, GUILayout.Height(26))) Lang.mode = m;
             GUI.backgroundColor = old;
         }
 
@@ -262,11 +335,11 @@ namespace ClaudeModLib
             GUILayout.EndHorizontal();
             GUILayout.Space(6);
 
-            GUILayout.Label(Lang.T("Features", "功能开关"), Ui.header);
+            Ui.SectionHeader(Lang.T("Features", "功能开关"));
             foreach (var m in mods)
             {
                 if (m.features.Count == 0) continue;
-                GUILayout.Label(Txt(m.displayName), Ui.bold);
+                GUILayout.Label(Txt(m.displayName), Ui.header);
                 foreach (var f in m.features)
                 {
                     bool v = Ui.Switch(f.enabled, Txt(f.label));
@@ -277,7 +350,8 @@ namespace ClaudeModLib
             }
 
             GUILayout.Space(8);
-            GUILayout.Label(Lang.T("Mods (enable/disable applies on next game start)", "Mod 列表（启用/禁用在下次启动游戏时生效）"), Ui.header);
+            Ui.SectionHeader(Lang.T("Mods", "模组列表"));
+            GUILayout.Label(Lang.T("Enable/disable applies on the next game start.", "启用/禁用在下次启动游戏时生效。"), Ui.small);
             foreach (var e in _entries)
             {
                 GUILayout.BeginHorizontal();
@@ -298,7 +372,7 @@ namespace ClaudeModLib
             GUILayout.Label(Lang.T("★ = uses ClaudeModLib", "★ = 使用 ClaudeModLib 的 mod"), Ui.small);
 
             GUILayout.Space(8);
-            GUILayout.Label(Lang.T("Developer tools", "开发工具"), Ui.header);
+            Ui.SectionHeader(Lang.T("Developer tools", "开发工具"));
             if (GUILayout.Button(Lang.T("Dump all game asset names → claudemodlib_asset_dump.txt", "导出全部游戏资源名 → claudemodlib_asset_dump.txt"), Ui.button))
             {
                 try { _status = Lang.T("Written: ", "已写入：") + DevTools.DumpAssets(); }
@@ -312,7 +386,7 @@ namespace ClaudeModLib
             }
 
             GUILayout.Space(8);
-            GUILayout.Label(Lang.T("Appearance", "外观"), Ui.header);
+            Ui.SectionHeader(Lang.T("Appearance", "外观"));
             GUILayout.Label(Lang.T("Theme: ", "主题：") + (Theme.data != null ? Theme.data.name : "?"), Ui.label);
             GUILayout.Label(Theme.filePath ?? "", Ui.small);
             if (Theme.lastError != null) Ui.ColoredLabel(Lang.T("theme.json error: ", "theme.json 出错：") + Theme.lastError, Ui.Red);

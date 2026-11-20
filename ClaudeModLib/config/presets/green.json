@@ -1,0 +1,39 @@
+// ClaudeModLib theme. Edit, then press "Reload theme" in the ClaudeModLib panel (no restart needed).
+// Colours: "#RRGGBB" or "#RRGGBBAA" (AA = opacity, FF = solid).
+// Each surface ("window", "titleBar", "box", "button", "buttonHover", "buttonActive", "progressBackground") is either
+//   a flat colour:            { "color": "#1C2B21F0" }
+//   or a game sprite + tint:  { "sprite": "<name from claudemodlib_ui_dump.txt>", "tint": "#FFFFFFFF" }
+// Sprites keep their 9-slice border, so stretchable native panel/button sprites look right at any size.
+// Sprites are looked up among loaded game sprites; if one is not loaded yet the colour is used.
+{
+  "name": "Green (dark)",
+  "fonts": [ "Microsoft YaHei", "SimHei", "Arial" ],
+  "fontSize": 14,
+  "titleBarHeight": 26,
+
+  "window":             { "color": "#1C2B21F0", "sprite": "", "tint": "#FFFFFFFF" },
+  "titleBar":           { "color": "#3E5E3AFF", "sprite": "", "tint": "#FFFFFFFF" },
+  "sectionHeader":      { "color": "#2E472BFF" },
+  "sectionHeaderText":  "#E9C46AFF",
+  "box":                { "color": "#FFFFFF10", "sprite": "", "tint": "#FFFFFFFF" },
+  "button":             { "color": "#3E5E3AFF", "sprite": "", "tint": "#FFFFFFFF" },
+  "buttonHover":        { "color": "#527A4CFF", "sprite": "", "tint": "#FFFFFFFF" },
+  "buttonActive":       { "color": "#2E472BFF", "sprite": "", "tint": "#FFFFFFFF" },
+  "progressBackground": { "color": "#00000080", "sprite": "", "tint": "#FFFFFFFF" },
+
+  "titleText":  "#F4ECD6FF",
+  "text":       "#EDE6D3FF",
+  "subtext":    "#B8B29FFF",
+  "header":     "#E9C46AFF",
+  "buttonText": "#F4ECD6FF",
+
+  "switchOn":   "#3F9C4BFF",
+  "switchOff":  "#A63D35FF",
+  "switchKnob": "#F4ECD6FF",
+
+  // status colours used by mods (Ui.Green / Red / Yellow / Blue)
+  "good": "#8BD17CFF",
+  "bad":  "#F07B6EFF",
+  "warn": "#F2C14EFF",
+  "info": "#9CC8F0FF"
+}

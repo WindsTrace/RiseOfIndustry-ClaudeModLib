@@ -16,38 +16,45 @@ namespace ClaudeModLib
         public string sprite = "";
         /// <summary>Multiplied onto the sprite (many native UI sprites are white and tinted).</summary>
         public string tint = "#FFFFFFFF";
+        /// <summary>Optional outline for flat colours (like the game's orange icon frames). Empty / 0 = none.</summary>
+        public string borderColor = "";
+        public int borderWidth = 0;
         public ThemeFill() { }
         public ThemeFill(string color) { this.color = color; }
+        public ThemeFill(string color, string borderColor, int borderWidth) { this.color = color; this.borderColor = borderColor; this.borderWidth = borderWidth; }
     }
 
     /// <summary>Contents of ClaudeModLib/config/theme.json. Colours are "#RRGGBB" or "#RRGGBBAA".</summary>
+    /// <summary>Defaults = the game's native look (cream panels, orange accents, dark-brown title bar).</summary>
     public class ThemeData
     {
-        public string name = "Default (Rise of Industry green)";
-        public string[] fonts = { "Microsoft YaHei", "SimHei", "Arial" };
+        public string name = "Native (cream / orange)";
+        public string[] fonts = { "Bahnschrift", "Microsoft YaHei", "SimHei", "Arial" };
         public int fontSize = 14;
-        public int titleBarHeight = 26;
+        public int titleBarHeight = 30;
 
-        public ThemeFill window = new ThemeFill("#1C2B21F0");
-        public ThemeFill titleBar = new ThemeFill("#3E5E3AFF");
-        public ThemeFill box = new ThemeFill("#FFFFFF10");
-        public ThemeFill button = new ThemeFill("#3E5E3AFF");
-        public ThemeFill buttonHover = new ThemeFill("#527A4CFF");
-        public ThemeFill buttonActive = new ThemeFill("#2E472BFF");
-        public ThemeFill progressBackground = new ThemeFill("#00000080");
+        public ThemeFill window = new ThemeFill("#F1EBDCFF");
+        public ThemeFill titleBar = new ThemeFill("#3A2B20FF");
+        public ThemeFill sectionHeader = new ThemeFill("#C87A06FF");
+        public ThemeFill box = new ThemeFill("#F7F2E7FF", "#C87A06FF", 2);
+        public ThemeFill button = new ThemeFill("#C87A06FF");
+        public ThemeFill buttonHover = new ThemeFill("#DC8E1CFF");
+        public ThemeFill buttonActive = new ThemeFill("#A86504FF");
+        public ThemeFill progressBackground = new ThemeFill("#9F9C91FF");
 
-        public string titleText = "#F4ECD6FF";
-        public string text = "#EDE6D3FF";
-        public string subtext = "#B8B29FFF";
-        public string header = "#E9C46AFF";
-        public string buttonText = "#F4ECD6FF";
-        public string switchOn = "#3F9C4BFF";
-        public string switchOff = "#A63D35FF";
-        public string switchKnob = "#F4ECD6FF";
-        public string good = "#8BD17CFF";
-        public string bad = "#F07B6EFF";
-        public string warn = "#F2C14EFF";
-        public string info = "#9CC8F0FF";
+        public string titleText = "#F1EBDCFF";
+        public string sectionHeaderText = "#F1EBDCFF";
+        public string text = "#4A4036FF";
+        public string subtext = "#86837BFF";
+        public string header = "#C87A06FF";
+        public string buttonText = "#F7F2E7FF";
+        public string switchOn = "#5E8C31FF";
+        public string switchOff = "#B5452FFF";
+        public string switchKnob = "#F7F2E7FF";
+        public string good = "#4E8A2EFF";
+        public string bad = "#B3412EFF";
+        public string warn = "#C87A06FF";
+        public string info = "#3D7AA8FF";
     }
 
     /// <summary>
@@ -129,7 +136,31 @@ namespace ClaudeModLib
                     return tex;
                 }
             }
+            if (f.borderWidth > 0 && !string.IsNullOrEmpty(f.borderColor))
+            {
+                int bw = Mathf.Clamp(f.borderWidth, 1, 8);
+                border = new RectOffset(bw, bw, bw, bw);
+                return Bordered(Col(f.color, Color.clear), Col(f.borderColor, Color.clear), bw);
+            }
             return Solid(Col(f.color, Color.clear));
+        }
+
+        /// <summary>A 9-sliceable texture: fill colour with a <paramref name="bw"/>-pixel outline.</summary>
+        internal static Texture2D Bordered(Color fill, Color line, int bw)
+        {
+            string key = "B" + ColorUtility.ToHtmlStringRGBA(fill) + ColorUtility.ToHtmlStringRGBA(line) + bw;
+            Texture2D t;
+            if (_texCache.TryGetValue(key, out t) && t != null) return t;
+            int n = bw * 2 + 2;
+            t = new Texture2D(n, n, TextureFormat.RGBA32, false);
+            t.filterMode = FilterMode.Point;
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                    t.SetPixel(x, y, x < bw || y < bw || x >= n - bw || y >= n - bw ? line : fill);
+            t.Apply();
+            t.hideFlags = HideFlags.DontSave;
+            _texCache[key] = t;
+            return t;
         }
 
         internal static Texture2D Solid(Color c)

@@ -1,37 +1,40 @@
 // ClaudeModLib theme. Edit, then press "Reload theme" in the ClaudeModLib panel (no restart needed).
+// Other looks: copy a file from config\presets\ over this one.
 // Colours: "#RRGGBB" or "#RRGGBBAA" (AA = opacity, FF = solid).
-// Each surface ("window", "titleBar", "box", "button", "buttonHover", "buttonActive", "progressBackground") is either
-//   a flat colour:            { "color": "#1C2B21F0" }
-//   or a game sprite + tint:  { "sprite": "<name from claudemodlib_ui_dump.txt>", "tint": "#FFFFFFFF" }
-// Sprites keep their 9-slice border, so stretchable native panel/button sprites look right at any size.
-// Sprites are looked up among loaded game sprites; if one is not loaded yet the colour is used.
+// Surfaces ("window", "titleBar", "sectionHeader", "box", "button", "buttonHover", "buttonActive", "progressBackground"):
+//   flat colour:            { "color": "#F1EBDCFF" }
+//   flat colour + outline:  { "color": "#F7F2E7FF", "borderColor": "#C87A06FF", "borderWidth": 2 }
+//   game sprite + tint:     { "sprite": "<name from claudemodlib_ui_dump.txt>", "tint": "#FFFFFFFF" }   (keeps 9-slice border)
+// fonts: OS font names; later names fill in missing glyphs (Bahnschrift for Latin ~ the game's condensed font, YaHei for Chinese).
 {
-  "name": "Default (Rise of Industry green)",
-  "fonts": [ "Microsoft YaHei", "SimHei", "Arial" ],
+  "name": "Native (cream / orange)",
+  "fonts": [ "Bahnschrift", "Microsoft YaHei", "SimHei", "Arial" ],
   "fontSize": 14,
-  "titleBarHeight": 26,
+  "titleBarHeight": 30,
 
-  "window":             { "color": "#1C2B21F0", "sprite": "", "tint": "#FFFFFFFF" },
-  "titleBar":           { "color": "#3E5E3AFF", "sprite": "", "tint": "#FFFFFFFF" },
-  "box":                { "color": "#FFFFFF10", "sprite": "", "tint": "#FFFFFFFF" },
-  "button":             { "color": "#3E5E3AFF", "sprite": "", "tint": "#FFFFFFFF" },
-  "buttonHover":        { "color": "#527A4CFF", "sprite": "", "tint": "#FFFFFFFF" },
-  "buttonActive":       { "color": "#2E472BFF", "sprite": "", "tint": "#FFFFFFFF" },
-  "progressBackground": { "color": "#00000080", "sprite": "", "tint": "#FFFFFFFF" },
+  "window":             { "color": "#F1EBDCFF" },
+  "titleBar":           { "color": "#3A2B20FF" },
+  "sectionHeader":      { "color": "#C87A06FF" },
+  "box":                { "color": "#F7F2E7FF", "borderColor": "#C87A06FF", "borderWidth": 2 },
+  "button":             { "color": "#C87A06FF" },
+  "buttonHover":        { "color": "#DC8E1CFF" },
+  "buttonActive":       { "color": "#A86504FF" },
+  "progressBackground": { "color": "#9F9C91FF" },
 
-  "titleText":  "#F4ECD6FF",
-  "text":       "#EDE6D3FF",
-  "subtext":    "#B8B29FFF",
-  "header":     "#E9C46AFF",
-  "buttonText": "#F4ECD6FF",
+  "titleText":         "#F1EBDCFF",
+  "sectionHeaderText": "#F1EBDCFF",
+  "text":              "#4A4036FF",
+  "subtext":           "#86837BFF",
+  "header":            "#C87A06FF",
+  "buttonText":        "#F7F2E7FF",
 
-  "switchOn":   "#3F9C4BFF",
-  "switchOff":  "#A63D35FF",
-  "switchKnob": "#F4ECD6FF",
+  "switchOn":   "#5E8C31FF",
+  "switchOff":  "#B5452FFF",
+  "switchKnob": "#F7F2E7FF",
 
-  // status colours used by mods (Ui.Green / Red / Yellow / Blue)
-  "good": "#8BD17CFF",
-  "bad":  "#F07B6EFF",
-  "warn": "#F2C14EFF",
-  "info": "#9CC8F0FF"
+  // status colours used by mods (Ui.Green / Red / Yellow / Blue) - darker, for the cream background
+  "good": "#4E8A2EFF",
+  "bad":  "#B3412EFF",
+  "warn": "#C87A06FF",
+  "info": "#3D7AA8FF"
 }
