@@ -81,14 +81,14 @@ namespace CityProgress
             GUILayout.BeginHorizontal();
             GUILayout.Label(r.name.ToUpperInvariant(), Ui.bold);
             GUILayout.FlexibleSpace();
-            GUILayout.Label(r.nextTier != null ? TierName(r.tierName) + "  →  " + TierName(r.nextTierName) : TierName(r.tierName), Ui.small);
+            GUILayout.Label(r.nextTier != null ? TierName(r.tier) + "  →  " + TierName(r.nextTier) : TierName(r.tier), Ui.small);
             GUILayout.EndHorizontal();
 
             // population (big) + status
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             GUILayout.Label(Lang.T("Population", "总人口"), Ui.small);
-            GUILayout.Label(r.population.ToString("N0"), Ui.value);
+            GUILayout.Label(r.population.ToString("N0", System.Globalization.CultureInfo.InvariantCulture), Ui.value);
             GUILayout.EndVertical();
             GUILayout.FlexibleSpace();
             GUILayout.BeginVertical();
@@ -107,18 +107,20 @@ namespace CityProgress
             GUILayout.EndVertical();
         }
 
-        // Game tier names (SettlementTier.tierName) in the selected language.
-        static string TierName(string tier)
+        // Tier names by tierId. SettlementTier.tierName is already translated by the game in some languages
+        // (Chinese uses "村庄" for both Hamlet and Village), so it cannot be used to tell tiers apart.
+        static string TierName(SettlementTier tier)
         {
-            switch (tier)
+            if (tier == null) return "?";
+            switch (tier.tierId)
             {
-                case "Hamlet": return Lang.T("Hamlet", "村庄");
-                case "Village": return Lang.T("Village", "村镇");
-                case "Town": return Lang.T("Town", "城镇");
-                case "City": return Lang.T("City", "城市");
-                case "Metropolis": return Lang.T("Metropolis", "大都市");
-                case "Bloated": return Lang.T("Bloated", "超大都市");
-                default: return tier;
+                case 100: return Lang.T("Hamlet", "村庄");
+                case 200: return Lang.T("Village", "村镇");
+                case 300: return Lang.T("Town", "城镇");
+                case 400: return Lang.T("City", "城市");
+                case 500: return Lang.T("Metropolis", "大都市");
+                case 1000: return Lang.T("Bloated", "超大都市");
+                default: return tier.tierName;
             }
         }
 

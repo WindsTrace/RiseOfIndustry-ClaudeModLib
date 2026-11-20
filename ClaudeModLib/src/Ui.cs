@@ -42,7 +42,7 @@ namespace ClaudeModLib
         static GUIStyle _window, _titleBar, _titleText, _barBg, _barFill, _switchText, _clickLabel, _section;
         static GUISkin _skin;
         static Texture2D _white;
-        static Font _font;
+        static Font _font, _boldFont;
         static string _fontKey;
 
         static ThemeData T { get { return Theme.data ?? new ThemeData(); } }
@@ -68,18 +68,31 @@ namespace ClaudeModLib
         static void BuildStyles()
         {
             var t = T;
-            string fontKey = string.Join(",", t.fonts ?? new string[0]) + "@" + t.fontSize;
+            string fontKey = string.Join(",", t.fonts ?? new string[0]) + "|" + string.Join(",", t.boldFonts ?? new string[0]) + "@" + t.fontSize;
             if (_font == null || _fontKey != fontKey)
             {
                 try { _font = Font.CreateDynamicFontFromOSFont(t.fonts, Mathf.Max(8, t.fontSize)); } catch { _font = null; }
+                try { _boldFont = t.boldFonts != null && t.boldFonts.Length > 0 ? Font.CreateDynamicFontFromOSFont(t.boldFonts, Mathf.Max(8, t.fontSize)) : null; }
+                catch { _boldFont = null; }
                 _fontKey = fontKey;
+                try
+                {
+                    var installed = new HashSet<string>(Font.GetOSInstalledFontNames());
+                    Func<string[], string> first = names =>
+                    {
+                        if (names != null) foreach (var n in names) if (installed.Contains(n)) return n;
+                        return "(none found)";
+                    };
+                    Log.Info("fonts: body=" + first(t.fonts) + ", bold=" + first(t.boldFonts));
+                }
+                catch { }
             }
             int fs = Mathf.Max(8, t.fontSize);
 
             label = Text(GUI.skin.label, fs, t.text);
             small = Text(GUI.skin.label, fs - 2, t.subtext);
-            bold = Text(GUI.skin.label, fs, t.text); bold.fontStyle = FontStyle.Bold;
-            header = Text(GUI.skin.label, fs + 2, t.header); header.fontStyle = FontStyle.Bold;
+            bold = Strong(Text(GUI.skin.label, fs, t.text));
+            header = Strong(Text(GUI.skin.label, fs + 1, t.header));
 
             RectOffset border;
             button = Text(GUI.skin.button, fs - 1, t.buttonText);
@@ -101,24 +114,30 @@ namespace ClaudeModLib
 
             _titleBar = new GUIStyle();
             _titleBar.normal.background = Theme.Texture(t.titleBar, out border); _titleBar.border = border;
-            _titleText = Text(GUI.skin.label, fs, t.titleText);
-            _titleText.fontStyle = FontStyle.Bold; _titleText.alignment = TextAnchor.MiddleLeft;
+            _titleText = Strong(Text(GUI.skin.label, fs + 1, t.titleText));
+            _titleText.alignment = TextAnchor.MiddleLeft;
 
             _barBg = new GUIStyle(); _barBg.normal.background = Theme.Texture(t.progressBackground, out border); _barBg.border = border;
             _barFill = new GUIStyle(); _barFill.normal.background = Theme.Solid(Color.white);
             _white = Theme.Solid(Color.white);
             _switchText = Text(GUI.skin.label, fs - 3, "#FFFFFFFF");
-            _switchText.alignment = TextAnchor.MiddleCenter; _switchText.fontStyle = FontStyle.Bold;
+            _switchText.alignment = TextAnchor.MiddleCenter; Strong(_switchText);
             _clickLabel = Text(GUI.skin.label, fs, t.text);
             _clickLabel.alignment = TextAnchor.MiddleLeft;
 
-            value = Text(GUI.skin.label, fs + 6, t.header); value.fontStyle = FontStyle.Bold;
+            value = Strong(Text(GUI.skin.label, fs + 8, t.header));
             _section = new GUIStyle();
             _section.normal.background = Theme.Texture(t.sectionHeader ?? t.button, out border); _section.border = border;
             _section.margin = new RectOffset(0, 0, 6, 4);
-            sectionText = Text(GUI.skin.label, fs + 1, t.sectionHeaderText ?? t.buttonText);
-            sectionText.fontStyle = FontStyle.Bold; sectionText.alignment = TextAnchor.MiddleLeft;
+            sectionText = Strong(Text(GUI.skin.label, fs + 1, t.sectionHeaderText ?? t.buttonText));
+            sectionText.alignment = TextAnchor.MiddleLeft;
             sectionText.padding = new RectOffset(10, 10, 0, 0);
+            _infoGlyph = Strong(Text(GUI.skin.label, fs, t.sectionHeaderText));
+            _infoGlyph.alignment = TextAnchor.MiddleCenter; _infoGlyph.padding = new RectOffset(0, 0, 0, 1);
+            _tooltip = Text(GUI.skin.box, fs - 1, t.titleText);
+            _tooltip.normal.background = Theme.Texture(t.titleBar, out border); _tooltip.border = border;
+            _tooltip.alignment = TextAnchor.UpperLeft; _tooltip.wordWrap = true;
+            _tooltip.padding = new RectOffset(10, 10, 8, 8);
 
             // Full skin used while drawing lib windows, so default GUILayout widgets (scrollbars, fields) match too.
             // (the previous skin may still be active this frame, so it is not destroyed)
@@ -145,13 +164,82 @@ namespace ClaudeModLib
         public static GUISkin skin { get { EnsureStyles(); return _skin; } }
 
         /// <summary>Full-width accent bar with a title (like the game's orange "Farmers Market" headers).</summary>
-        public static void SectionHeader(string text)
+        public static void SectionHeader(string text) { SectionHeader(text, null); }
+
+        /// <summary>
+        /// Section header with an ⓘ icon at its right end. Hovering shows <paramref name="infoTooltip"/>;
+        /// returns true on the frame the icon is clicked.
+        /// </summary>
+        public static bool SectionHeader(string text, string infoTooltip)
         {
             EnsureStyles();
             var r = GUILayoutUtility.GetRect(new GUIContent(text), sectionText, GUILayout.Height(28), GUILayout.ExpandWidth(true));
             r.y += 4; r.height -= 2;
             GUI.Box(r, GUIContent.none, _section);
             GUI.Label(r, text, sectionText);
+            if (string.IsNullOrEmpty(infoTooltip)) return false;
+            var icon = new Rect(r.xMax - r.height + 2, r.y + 3, r.height - 6, r.height - 6);
+            return InfoIcon(icon, infoTooltip, true);
+        }
+
+        /// <summary>An ⓘ icon in the layout; hover shows the tooltip, returns true when clicked.</summary>
+        public static bool InfoIcon(string tooltip)
+        {
+            EnsureStyles();
+            var r = GUILayoutUtility.GetRect(20, 20, GUILayout.Width(20), GUILayout.Height(20));
+            return InfoIcon(r, tooltip, false);
+        }
+
+        static bool InfoIcon(Rect r, string tooltip, bool onAccent)
+        {
+            // On the orange header: cream disc with orange "i"; elsewhere: orange disc with cream "i".
+            var disc = onAccent ? C(T.sectionHeaderText, Color.white) : C(T.header, new Color(0.78f, 0.48f, 0.02f));
+            var glyph = onAccent ? C(T.header, new Color(0.78f, 0.48f, 0.02f)) : C(T.sectionHeaderText, Color.white);
+            var old = GUI.color; GUI.color = disc; GUI.DrawTexture(r, Circle()); GUI.color = old;
+            GUI.Label(r, "i", Colored(_infoGlyph, glyph));
+            return GUI.Button(r, new GUIContent("", tooltip), GUIStyle.none);
+        }
+
+        static Texture2D _circle;
+        static GUIStyle _infoGlyph, _tooltip;
+
+        static Texture2D Circle()
+        {
+            if (_circle != null) return _circle;
+            const int n = 64; float c = (n - 1) / 2f;
+            _circle = new Texture2D(n, n, TextureFormat.RGBA32, false);
+            for (int x = 0; x < n; x++)
+                for (int y = 0; y < n; y++)
+                {
+                    float d = Mathf.Sqrt((x - c) * (x - c) + (y - c) * (y - c));
+                    _circle.SetPixel(x, y, new Color(1, 1, 1, Mathf.Clamp01(c - d + 0.5f)));   // anti-aliased edge
+                }
+            _circle.Apply();
+            _circle.hideFlags = HideFlags.DontSave;
+            return _circle;
+        }
+
+        /// <summary>Draws the pending IMGUI tooltip (GUI.tooltip) near the mouse, kept inside the window.</summary>
+        static void DrawTooltip(float windowWidth, float windowHeight)
+        {
+            var tip = GUI.tooltip;
+            if (string.IsNullOrEmpty(tip) || Event.current.type != EventType.Repaint) return;
+            var content = new GUIContent(tip);
+            float w = Mathf.Min(360f, windowWidth - 16f);
+            float h = _tooltip.CalcHeight(content, w);
+            var m = Event.current.mousePosition;
+            float x = Mathf.Clamp(m.x - w + 12f, 8f, windowWidth - w - 8f);
+            float y = m.y + 18f;
+            if (y + h > windowHeight - 4f) y = Mathf.Max(4f, m.y - h - 8f);
+            GUI.Box(new Rect(x, y, w, h), content, _tooltip);
+        }
+
+        /// <summary>Emphasis via the real semibold font (FontStyle stays Normal: Unity's synthetic bold looks crude).</summary>
+        static GUIStyle Strong(GUIStyle s)
+        {
+            s.fontStyle = FontStyle.Normal;
+            if (_boldFont != null) s.font = _boldFont;
+            return s;
         }
 
         static GUIStyle Text(GUIStyle baseStyle, int size, string colorHex)
@@ -170,7 +258,7 @@ namespace ClaudeModLib
         public static Rect Window(int id, Rect rect, string title, Action content)
         {
             EnsureStyles();
-            float w = rect.width;
+            float w = rect.width, h = rect.height;
             int tbh = T.titleBarHeight;
             return GUI.Window(id, rect, _ =>
             {
@@ -178,6 +266,7 @@ namespace ClaudeModLib
                 GUI.Label(new Rect(10, 0, w - 20, tbh), title ?? "", _titleText);
                 try { content(); }
                 catch (Exception e) { GUILayout.Label(Lang.T("error: ", "出错：") + e.Message, small); }
+                DrawTooltip(w, h);
                 GUI.DragWindow(new Rect(0, 0, 10000, tbh));
             }, GUIContent.none, _window);
         }
@@ -372,7 +461,16 @@ namespace ClaudeModLib
             GUILayout.Label(Lang.T("★ = uses ClaudeModLib", "★ = 使用 ClaudeModLib 的 mod"), Ui.small);
 
             GUILayout.Space(8);
-            Ui.SectionHeader(Lang.T("Developer tools", "开发工具"));
+            string folder = Application.persistentDataPath.Replace('/', '\\');
+            if (Ui.SectionHeader(Lang.T("Developer tools", "开发工具"),
+                Lang.T("Export files are written to:\n", "导出的文件保存在：\n") + folder +
+                "\n\n• claudemodlib_asset_dump.txt\n• claudemodlib_ui_dump.txt\n• output_log.txt" +
+                Lang.T("\n\nClick to open this folder (path copied to clipboard).", "\n\n点击打开该文件夹（路径已复制到剪贴板）。")))
+            {
+                GUIUtility.systemCopyBuffer = folder;
+                Application.OpenURL("file:///" + Application.persistentDataPath);
+                _status = Lang.T("Folder opened, path copied: ", "已打开文件夹，路径已复制：") + folder;
+            }
             if (GUILayout.Button(Lang.T("Dump all game asset names → claudemodlib_asset_dump.txt", "导出全部游戏资源名 → claudemodlib_asset_dump.txt"), Ui.button))
             {
                 try { _status = Lang.T("Written: ", "已写入：") + DevTools.DumpAssets(); }

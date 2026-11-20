@@ -7,7 +7,8 @@
 // Sprites are looked up among loaded game sprites; if one is not loaded yet the colour is used.
 {
   "name": "Green (dark)",
-  "fonts": [ "Microsoft YaHei", "SimHei", "Arial" ],
+  "fonts":     [ "Bahnschrift SemiCondensed", "Microsoft YaHei", "SimHei", "Arial" ],
+  "boldFonts": [ "Bahnschrift SemiBold SemiConden", "Microsoft YaHei", "SimHei", "Arial" ],
   "fontSize": 14,
   "titleBarHeight": 26,
 

@@ -29,7 +29,10 @@ namespace ClaudeModLib
     public class ThemeData
     {
         public string name = "Native (cream / orange)";
-        public string[] fonts = { "Bahnschrift", "Microsoft YaHei", "SimHei", "Arial" };
+        /// <summary>Body text. Later names fill in missing glyphs (CJK).</summary>
+        public string[] fonts = { "Bahnschrift SemiCondensed", "Bahnschrift", "Microsoft YaHei", "SimHei", "Arial" };
+        /// <summary>Emphasis (titles, headers, numbers): a REAL semibold face, never Unity's synthetic bold.</summary>
+        public string[] boldFonts = { "Bahnschrift SemiBold SemiConden", "Bahnschrift SemiBold", "Microsoft YaHei", "SimHei", "Arial" };
         public int fontSize = 14;
         public int titleBarHeight = 30;
 

@@ -5,10 +5,13 @@
 //   flat colour:            { "color": "#F1EBDCFF" }
 //   flat colour + outline:  { "color": "#F7F2E7FF", "borderColor": "#C87A06FF", "borderWidth": 2 }
 //   game sprite + tint:     { "sprite": "<name from claudemodlib_ui_dump.txt>", "tint": "#FFFFFFFF" }   (keeps 9-slice border)
-// fonts: OS font names; later names fill in missing glyphs (Bahnschrift for Latin ~ the game's condensed font, YaHei for Chinese).
+// fonts / boldFonts: OS font names; later names fill in missing glyphs (Bahnschrift SemiCondensed ~ the game's
+// condensed Oswald for Latin, YaHei for Chinese). boldFonts must be a real bold/semibold face: emphasis never uses
+// Unity's synthetic bold, which looks crude.
 {
   "name": "Native (cream / orange)",
-  "fonts": [ "Bahnschrift", "Microsoft YaHei", "SimHei", "Arial" ],
+  "fonts":     [ "Bahnschrift SemiCondensed", "Bahnschrift", "Microsoft YaHei", "SimHei", "Arial" ],
+  "boldFonts": [ "Bahnschrift SemiBold SemiConden", "Bahnschrift SemiBold", "Microsoft YaHei", "SimHei", "Arial" ],
   "fontSize": 14,
   "titleBarHeight": 30,
 
