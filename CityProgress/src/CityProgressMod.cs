@@ -21,8 +21,10 @@ namespace CityProgress
         {
             base.OnModWasLoaded();
             var handle = ModLib.Register(this, LocText.Of("City progress", "城市升级进度"));
-            // Off by default: the player opens it from the ClaudeModLib panel (the choice is then remembered).
-            _show = handle.AddFeature("window", LocText.Of("Show city progress window", "显示城市升级进度窗口"), false);
+            // Session-only and off: every game starts with the window closed; open it from the ClaudeModLib panel,
+            // close it with the title-bar ×. (A persisted "on" used to reopen it in every new game.)
+            _show = handle.AddFeature("window", LocText.Of("Show city progress window", "显示城市升级进度窗口"), false,
+                                      null, false);
             _onlyMine = handle.AddFeature("onlyMine", LocText.Of("Only cities I have supplied", "只显示我供过货的城市"), true);
             handle.AddWindow(LocText.Of("City progress", "城市升级进度"), new Rect(20, 110, 380, 640), DrawWindow, _show);
         }

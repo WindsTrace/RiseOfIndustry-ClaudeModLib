@@ -35,18 +35,23 @@ namespace ClaudeModLib
         /// <summary>Bilingual label/description; read <c>label.text</c> for the current language.</summary>
         public LocText label;
         public LocText description;
+        /// <summary>
+        /// True: state is saved in PlayerPrefs and restored next session (settings).
+        /// False: state lives only for this session and starts at the default every launch (e.g. "window open").
+        /// </summary>
+        public readonly bool persistent;
         bool _enabled;
         public event Action<bool> changed;
 
-        internal Feature(ModHandle owner, string id, LocText label, bool defaultOn)
+        internal Feature(ModHandle owner, string id, LocText label, bool defaultOn, bool persistent)
         {
-            this.owner = owner; this.id = id; this.label = label;
-            _enabled = PlayerPrefs.GetInt(PrefKey, defaultOn ? 1 : 0) == 1;
+            this.owner = owner; this.id = id; this.label = label; this.persistent = persistent;
+            _enabled = persistent ? PlayerPrefs.GetInt(PrefKey, defaultOn ? 1 : 0) == 1 : defaultOn;
         }
 
         string PrefKey { get { return "ClaudeModLib." + owner.name + "." + id; } }
 
-        /// <summary>Current state; persisted in PlayerPrefs across sessions.</summary>
+        /// <summary>Current state (saved across sessions only when <see cref="persistent"/>).</summary>
         public bool enabled
         {
             get { return _enabled; }
@@ -54,8 +59,7 @@ namespace ClaudeModLib
             {
                 if (_enabled == value) return;
                 _enabled = value;
-                PlayerPrefs.SetInt(PrefKey, value ? 1 : 0);
-                PlayerPrefs.Save();
+                if (persistent) { PlayerPrefs.SetInt(PrefKey, value ? 1 : 0); PlayerPrefs.Save(); }
                 var h = changed; if (h != null) h(value);
             }
         }
@@ -73,12 +77,13 @@ namespace ClaudeModLib
         internal ModHandle(Mod mod, string name, LocText displayName) { this.mod = mod; this.name = name; this.displayName = displayName; }
 
         /// <summary>
-        /// Adds an on/off switch shown in the ClaudeModLib panel. State is persisted.
-        /// Labels accept a plain string or a bilingual <see cref="LocText"/>: <c>LocText.Of("Show window", "æ˜¾ç¤ºçª—å£")</c>.
+        /// Adds an on/off switch shown in the ClaudeModLib panel.
+        /// Labels accept a plain string or a bilingual <see cref="LocText"/>: <c>LocText.Of("Show window", "显示窗口")</c>.
+        /// persistent: true (default) = remembered across sessions (settings); false = session only, starts at defaultOn every launch (use for "window open" switches).
         /// </summary>
-        public Feature AddFeature(string id, LocText label, bool defaultOn, LocText description = null)
+        public Feature AddFeature(string id, LocText label, bool defaultOn, LocText description = null, bool persistent = true)
         {
-            var f = new Feature(this, id, label, defaultOn);
+            var f = new Feature(this, id, label, defaultOn, persistent);
             f.description = description;
             features.Add(f);
             return f;

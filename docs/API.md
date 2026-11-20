@@ -28,8 +28,8 @@ To use it, add the dependency in your `desc.json` (this makes the game load the 
 
 | Member | Description |
 |---|---|
-| `Feature AddFeature(string id, LocText label, bool defaultOn, LocText description = null)` | An on/off switch in the lib panel. State persists in PlayerPrefs (`ClaudeModLib.<mod>.<id>`). |
-| `LibWindow AddWindow(LocText title, Rect rect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus = false)` | A draggable IMGUI window, drawn while `visibleWhen.enabled` and a game is running. Coordinates are in 1080p units (scaled automatically). |
+| `Feature AddFeature(string id, LocText label, bool defaultOn, LocText description = null, bool persistent = true)` | An on/off switch in the lib panel. `persistent: true` = remembered in PlayerPrefs (`ClaudeModLib.<mod>.<id>`) — for settings; `false` = session only, starts at `defaultOn` every launch — use it for "window open" switches so windows don't pop up in every new game. |
+| `LibWindow AddWindow(LocText title, Rect rect, Action<LibWindow> draw, Feature visibleWhen, bool alsoInMenus = false)` | A draggable IMGUI window, drawn while `visibleWhen.enabled` and a game is running. It gets a title-bar **×** that switches `visibleWhen` off. Coordinates are in 1080p units (scaled automatically). |
 
 All `LocText` parameters also accept a plain `string` (same text in every language).
 
@@ -185,8 +185,10 @@ population figure) · `Ui.SectionHeader(string)` (full-width accent bar with tit
 "Farmers Market" headers) · `GUIStyle Ui.Colored(GUIStyle, Color)` (copy with replaced text colour — use this, not
 `GUI.contentColor`, which multiplies and turns dark on light themes) · `GUISkin Ui.skin` (themed skin; lib windows
 are drawn with it, so default GUILayout widgets and scrollbars match) ·
-`Rect Ui.Window(int id, Rect rect, string title, Action content)` — a themed, draggable window with title bar
-(what `ModHandle.AddWindow` uses).
+`Rect Ui.Window(int id, Rect rect, string title, Action content, Action onClose = null)` — a themed, draggable
+window with title bar; with `onClose` it shows a native-style × (what `ModHandle.AddWindow` uses) ·
+`bool Ui.SectionHeader(string text, string infoTooltip)` / `bool Ui.InfoIcon(string tooltip)` — ⓘ icon with hover
+tooltip, true when clicked.
 
 ## Theme — appearance (`ClaudeModLib/config/theme.json`)
 

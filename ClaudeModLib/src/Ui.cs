@@ -138,6 +138,11 @@ namespace ClaudeModLib
             _tooltip.normal.background = Theme.Texture(t.titleBar, out border); _tooltip.border = border;
             _tooltip.alignment = TextAnchor.UpperLeft; _tooltip.wordWrap = true;
             _tooltip.padding = new RectOffset(10, 10, 8, 8);
+            // Title-bar ×: accent colour on the dark bar, lighter on hover (like the game's orange close icons).
+            _closeButton = Strong(Text(GUI.skin.label, fs + 8, t.header));
+            _closeButton.alignment = TextAnchor.MiddleCenter;
+            _closeButton.padding = new RectOffset(0, 0, 0, 2);
+            _closeButton.hover.textColor = _closeButton.active.textColor = Color.Lerp(C(t.header, Color.white), Color.white, 0.45f);
 
             // Full skin used while drawing lib windows, so default GUILayout widgets (scrollbars, fields) match too.
             // (the previous skin may still be active this frame, so it is not destroyed)
@@ -201,7 +206,7 @@ namespace ClaudeModLib
         }
 
         static Texture2D _circle;
-        static GUIStyle _infoGlyph, _tooltip;
+        static GUIStyle _infoGlyph, _tooltip, _closeButton;
 
         static Texture2D Circle()
         {
@@ -255,7 +260,12 @@ namespace ClaudeModLib
         /// Draws a themed, draggable window (title bar from the theme) and returns its new rect.
         /// Use inside OnGUI; <paramref name="content"/> uses GUILayout.
         /// </summary>
-        public static Rect Window(int id, Rect rect, string title, Action content)
+        public static Rect Window(int id, Rect rect, string title, Action content) { return Window(id, rect, title, content, null); }
+
+        /// <summary>
+        /// Themed window with a title-bar × (like native windows) when <paramref name="onClose"/> is given.
+        /// </summary>
+        public static Rect Window(int id, Rect rect, string title, Action content, Action onClose)
         {
             EnsureStyles();
             float w = rect.width, h = rect.height;
@@ -263,7 +273,12 @@ namespace ClaudeModLib
             return GUI.Window(id, rect, _ =>
             {
                 GUI.Box(new Rect(0, 0, w, tbh), GUIContent.none, _titleBar);
-                GUI.Label(new Rect(10, 0, w - 20, tbh), title ?? "", _titleText);
+                GUI.Label(new Rect(10, 0, w - (onClose != null ? 44 : 20), tbh), title ?? "", _titleText);
+                if (onClose != null)
+                {
+                    var xr = new Rect(w - tbh, 0, tbh, tbh);
+                    if (GUI.Button(xr, new GUIContent("×", Lang.T("Close", "关闭")), _closeButton)) onClose();
+                }
                 try { content(); }
                 catch (Exception e) { GUILayout.Label(Lang.T("error: ", "出错：") + e.Message, small); }
                 DrawTooltip(w, h);
@@ -375,7 +390,9 @@ namespace ClaudeModLib
                     if (win.visible)
                     {
                         var captured = win;
-                        win.rect = Ui.Window(win.id, win.rect, win.title != null ? win.title.text : "", () => captured.draw(captured));
+                        Action close = null;
+                        if (captured.visibleWhen != null) close = () => captured.visibleWhen.enabled = false;
+                        win.rect = Ui.Window(win.id, win.rect, win.title != null ? win.title.text : "", () => captured.draw(captured), close);
                     }
 
             if (LibPanel.visible) LibPanel.Draw(mods);
@@ -396,7 +413,7 @@ namespace ClaudeModLib
 
         internal static void Draw(List<ModHandle> mods)
         {
-            _rect = Ui.Window(0x434D4BFF, _rect, "ClaudeModLib " + ModLib.Version, () => DrawContent(mods));
+            _rect = Ui.Window(0x434D4BFF, _rect, "ClaudeModLib " + ModLib.Version, () => DrawContent(mods), () => visible = false);
         }
 
         static string Txt(LocText t) { return t != null ? t.text : null; }
@@ -507,7 +524,6 @@ namespace ClaudeModLib
             if (_status != null) GUILayout.Label(_status, Ui.small);
 
             GUILayout.EndScrollView();
-            if (GUILayout.Button(Lang.T("Close", "关闭"), Ui.button)) visible = false;
         }
     }
 }
