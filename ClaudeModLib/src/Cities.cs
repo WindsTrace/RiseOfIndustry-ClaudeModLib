@@ -80,8 +80,10 @@ namespace ClaudeModLib
             int span = Math.Max(1, info.nextTierThreshold - info.tierThreshold);
             info.progress = Mathf.Clamp01((info.population - info.tierThreshold) / (float)span);
 
-            var adv = s.advancement;
-            if (adv != null && adv.isAdvancing) info.status = CityStatus.Advancing;
+            // isAdvancing throws while the world is still being generated (advancement state not initialised yet).
+            bool advancing = false;
+            try { var adv = s.advancement; advancing = adv != null && adv.isAdvancing; } catch (NullReferenceException) { }
+            if (advancing) info.status = CityStatus.Advancing;
             else if (growth != null && growth.IsWaitingForSponsor()) info.status = CityStatus.WaitingForSponsor;
             else if (growth != null && growth.populationLimitReached) info.status = CityStatus.LimitReached;
             else if (growth != null && growth.IsGrowing()) info.status = CityStatus.Growing;

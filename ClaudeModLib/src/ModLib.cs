@@ -74,7 +74,7 @@ namespace ClaudeModLib
 
         /// <summary>
         /// Adds an on/off switch shown in the ClaudeModLib panel. State is persisted.
-        /// Labels accept a plain string or a bilingual <see cref="LocText"/>: <c>LocText.Of("Show window", "显示窗口")</c>.
+        /// Labels accept a plain string or a bilingual <see cref="LocText"/>: <c>LocText.Of("Show window", "æ˜¾ç¤ºçª—å£")</c>.
         /// </summary>
         public Feature AddFeature(string id, LocText label, bool defaultOn, LocText description = null)
         {
@@ -99,7 +99,7 @@ namespace ClaudeModLib
     /// <summary>Static entry point of the library.</summary>
     public static class ModLib
     {
-        public const string Version = "0.2.0";
+        public const string Version = "0.3.0";
         public const string ModName = "ClaudeModLib";
 
         static ClaudeModLibMod _instance;
@@ -158,6 +158,11 @@ namespace ClaudeModLib
             AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
                 new AssemblyName(e.Name).Name == self.GetName().Name ? self : null;
             Mods.SnapshotLoaded();   // record which mods were enabled at start (EnableMod later changes isEnabled)
+            // Theme lives in <lib mod folder>/config/theme.json. (Our ModInstance.mods is filled only after this call,
+            // so find the folder by desc.json name.)
+            string libPath = null;
+            foreach (var mi in mod.modLoader.allMods) if (mi.description.name == ModName) libPath = mi.modPath;
+            Theme.Init(libPath ?? ".");
             Register(mod, "ClaudeModLib");
             Log.Info("v" + Version + " bootstrapped");
         }

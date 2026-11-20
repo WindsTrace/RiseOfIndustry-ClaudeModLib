@@ -34,8 +34,12 @@ namespace CityProgress
             foreach (var s in Cities.All())
             {
                 if (s == null) continue;
-                _rows.Add(Cities.GetInfo(s));
-                if (Cities.HasSupplied(s, player)) _supplied.Add(s);
+                try
+                {
+                    _rows.Add(Cities.GetInfo(s));
+                    if (Cities.HasSupplied(s, player)) _supplied.Add(s);
+                }
+                catch (System.Exception) { /* city not initialised yet (world still generating); retry next refresh */ }
             }
             _rows.Sort((a, b) => b.progress.CompareTo(a.progress));
         }
@@ -65,7 +69,7 @@ namespace CityProgress
             string status; Color color;
             Describe(r.status, out status, out color);
 
-            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.BeginVertical(Ui.box);
             GUILayout.BeginHorizontal();
             GUILayout.Label(r.name, Ui.label, GUILayout.Width(170));
             GUILayout.Label(r.nextTierName != null ? r.tierName + " → " + r.nextTierName : r.tierName, Ui.label, GUILayout.Width(170));

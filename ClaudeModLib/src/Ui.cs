@@ -22,43 +22,109 @@ namespace ClaudeModLib
         public bool visible { get { return (visibleWhen == null || visibleWhen.enabled) && (alsoInMenus || ModLib.inGame); } }
     }
 
-    /// <summary>Shared IMGUI styles and widgets (CJK-capable font, progress bar, colours).</summary>
+    /// <summary>
+    /// Shared IMGUI styles and widgets, all built from <see cref="Theme"/> (config/theme.json):
+    /// themed windows with a title bar, buttons, boxes, switches, progress bars, CJK-capable font.
+    /// </summary>
     public static class Ui
     {
-        public static GUIStyle label, small, bold, header, button;
-        public static readonly Color Green = new Color(0.5f, 1f, 0.5f), Yellow = new Color(1f, 0.85f, 0.2f),
-            Orange = new Color(1f, 0.5f, 0.3f), Blue = new Color(0.6f, 0.8f, 1f), Grey = new Color(0.8f, 0.8f, 0.8f),
-            Red = new Color(1f, 0.45f, 0.45f);
-        static readonly Color SwitchOn = new Color(0.20f, 0.62f, 0.28f), SwitchOff = new Color(0.62f, 0.20f, 0.20f);
-        static GUIStyle _barBg, _barFill, _switchText, _clickLabel;
+        public static GUIStyle label, small, bold, header, button, box;
+        /// <summary>Theme colours: Green = good, Red = bad, Yellow/Orange = warning, Blue = info, Grey = subtext.</summary>
+        public static Color Green { get { return C(T.good, new Color(0.5f, 1f, 0.5f)); } }
+        public static Color Red { get { return C(T.bad, new Color(1f, 0.45f, 0.45f)); } }
+        public static Color Yellow { get { return C(T.warn, new Color(1f, 0.85f, 0.2f)); } }
+        public static Color Orange { get { return Color.Lerp(Yellow, Red, 0.5f); } }
+        public static Color Blue { get { return C(T.info, new Color(0.6f, 0.8f, 1f)); } }
+        public static Color Grey { get { return C(T.subtext, new Color(0.8f, 0.8f, 0.8f)); } }
+
+        static GUIStyle _window, _titleBar, _titleText, _barBg, _barFill, _switchText, _clickLabel;
         static Texture2D _white;
         static Font _font;
+        static string _fontKey;
+
+        static ThemeData T { get { return Theme.data ?? new ThemeData(); } }
+        static Color C(string hex, Color fallback) { return Theme.Col(hex, fallback); }
 
         /// <summary>UI scale relative to 1080p (windows are drawn in 1080p coordinates).</summary>
         public static float scale { get { return Mathf.Max(1f, Screen.height / 1080f); } }
 
+        internal static void InvalidateStyles() { label = null; }
+
         internal static void EnsureStyles()
         {
             if (label != null) return;
-            try { _font = Font.CreateDynamicFontFromOSFont(new[] { "Microsoft YaHei", "SimHei", "Arial" }, 14); } catch { _font = null; }
-            label = new GUIStyle(GUI.skin.label) { fontSize = 14 };
-            small = new GUIStyle(GUI.skin.label) { fontSize = 12 };
-            small.normal.textColor = Grey;
-            bold = new GUIStyle(label) { fontStyle = FontStyle.Bold };
-            header = new GUIStyle(label) { fontSize = 16, fontStyle = FontStyle.Bold };
-            button = new GUIStyle(GUI.skin.button) { fontSize = 13 };
-            if (_font != null)
+            var t = T;
+            string fontKey = string.Join(",", t.fonts ?? new string[0]) + "@" + t.fontSize;
+            if (_font == null || _fontKey != fontKey)
             {
-                foreach (var s in new[] { label, small, bold, header, button }) s.font = _font;
-                GUI.skin.window.font = _font; GUI.skin.toggle.font = _font; GUI.skin.box.font = _font;
+                try { _font = Font.CreateDynamicFontFromOSFont(t.fonts, Mathf.Max(8, t.fontSize)); } catch { _font = null; }
+                _fontKey = fontKey;
             }
-            _barBg = new GUIStyle(GUI.skin.box); _barBg.normal.background = Solid(new Color(0.15f, 0.15f, 0.15f, 0.9f));
-            _barFill = new GUIStyle(GUI.skin.box); _barFill.normal.background = Solid(Color.white);
-            _white = Solid(Color.white);
-            _switchText = new GUIStyle(small) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, fontSize = 11 };
-            _switchText.normal.textColor = Color.white;
-            _clickLabel = new GUIStyle(label) { alignment = TextAnchor.MiddleLeft };
-            _clickLabel.hover.textColor = Color.white;
+            int fs = Mathf.Max(8, t.fontSize);
+
+            label = Text(GUI.skin.label, fs, t.text);
+            small = Text(GUI.skin.label, fs - 2, t.subtext);
+            bold = Text(GUI.skin.label, fs, t.text); bold.fontStyle = FontStyle.Bold;
+            header = Text(GUI.skin.label, fs + 2, t.header); header.fontStyle = FontStyle.Bold;
+
+            RectOffset border;
+            button = Text(GUI.skin.button, fs - 1, t.buttonText);
+            button.normal.background = Theme.Texture(t.button, out border); button.border = border;
+            button.hover.background = Theme.Texture(t.buttonHover, out border);
+            button.active.background = Theme.Texture(t.buttonActive, out border);
+            button.focused.background = button.normal.background;
+            button.hover.textColor = button.active.textColor = button.focused.textColor = button.normal.textColor;
+
+            box = new GUIStyle(GUI.skin.box);
+            box.normal.background = Theme.Texture(t.box, out border); box.border = border;
+            box.padding = new RectOffset(8, 8, 6, 6);
+
+            _window = new GUIStyle(GUI.skin.window);
+            _window.normal.background = _window.onNormal.background = Theme.Texture(t.window, out border);
+            _window.border = border;
+            _window.padding = new RectOffset(10, 10, t.titleBarHeight + 6, 10);
+            _window.contentOffset = Vector2.zero;
+
+            _titleBar = new GUIStyle();
+            _titleBar.normal.background = Theme.Texture(t.titleBar, out border); _titleBar.border = border;
+            _titleText = Text(GUI.skin.label, fs, t.titleText);
+            _titleText.fontStyle = FontStyle.Bold; _titleText.alignment = TextAnchor.MiddleLeft;
+
+            _barBg = new GUIStyle(); _barBg.normal.background = Theme.Texture(t.progressBackground, out border); _barBg.border = border;
+            _barFill = new GUIStyle(); _barFill.normal.background = Theme.Solid(Color.white);
+            _white = Theme.Solid(Color.white);
+            _switchText = Text(GUI.skin.label, fs - 3, "#FFFFFFFF");
+            _switchText.alignment = TextAnchor.MiddleCenter; _switchText.fontStyle = FontStyle.Bold;
+            _clickLabel = Text(GUI.skin.label, fs, t.text);
+            _clickLabel.alignment = TextAnchor.MiddleLeft;
+        }
+
+        static GUIStyle Text(GUIStyle baseStyle, int size, string colorHex)
+        {
+            var s = new GUIStyle(baseStyle) { fontSize = size };
+            if (_font != null) s.font = _font;
+            var c = C(colorHex, Color.white);
+            s.normal.textColor = s.hover.textColor = s.active.textColor = s.focused.textColor = c;
+            return s;
+        }
+
+        /// <summary>
+        /// Draws a themed, draggable window (title bar from the theme) and returns its new rect.
+        /// Use inside OnGUI; <paramref name="content"/> uses GUILayout.
+        /// </summary>
+        public static Rect Window(int id, Rect rect, string title, Action content)
+        {
+            EnsureStyles();
+            float w = rect.width;
+            int tbh = T.titleBarHeight;
+            return GUI.Window(id, rect, _ =>
+            {
+                GUI.Box(new Rect(0, 0, w, tbh), GUIContent.none, _titleBar);
+                GUI.Label(new Rect(10, 0, w - 20, tbh), title ?? "", _titleText);
+                try { content(); }
+                catch (Exception e) { GUILayout.Label(Lang.T("error: ", "出错：") + e.Message, small); }
+                GUI.DragWindow(new Rect(0, 0, 10000, tbh));
+            }, GUIContent.none, _window);
         }
 
         /// <summary>
@@ -72,9 +138,10 @@ namespace ClaudeModLib
             GUILayout.BeginHorizontal();
             var r = GUILayoutUtility.GetRect(54, 22, GUILayout.Width(54), GUILayout.Height(22));
             Fill(r, new Color(0f, 0f, 0f, 0.55f));
-            Fill(new Rect(r.x + 1, r.y + 1, r.width - 2, r.height - 2), value ? SwitchOn : SwitchOff);
+            Fill(new Rect(r.x + 1, r.y + 1, r.width - 2, r.height - 2),
+                value ? C(T.switchOn, new Color(0.20f, 0.62f, 0.28f)) : C(T.switchOff, new Color(0.62f, 0.20f, 0.20f)));
             var knob = new Rect(value ? r.xMax - 20 : r.x + 2, r.y + 2, 18, r.height - 4);
-            Fill(knob, new Color(0.95f, 0.95f, 0.95f));
+            Fill(knob, C(T.switchKnob, new Color(0.95f, 0.95f, 0.95f)));
             var stateRect = value ? new Rect(r.x + 2, r.y, r.width - 22, r.height) : new Rect(r.x + 20, r.y, r.width - 22, r.height);
             GUI.Label(stateRect, value ? Lang.T("ON", "开") : Lang.T("OFF", "关"), _switchText);
             bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none);
@@ -96,6 +163,7 @@ namespace ClaudeModLib
         /// <summary>Horizontal progress bar filling the layout width.</summary>
         public static void ProgressBar(float value01, Color color, float height = 14)
         {
+            EnsureStyles();
             var bar = GUILayoutUtility.GetRect(100, height, GUILayout.ExpandWidth(true));
             GUI.Box(bar, GUIContent.none, _barBg);
             var fill = new Rect(bar.x + 1, bar.y + 1, Mathf.Max(0, (bar.width - 2) * Mathf.Clamp01(value01)), bar.height - 2);
@@ -120,10 +188,6 @@ namespace ClaudeModLib
             return n.ToString();
         }
 
-        static Texture2D Solid(Color c)
-        {
-            var t = new Texture2D(1, 1); t.SetPixel(0, 0, c); t.Apply(); return t;
-        }
     }
 
     internal static class LibUi
@@ -151,12 +215,7 @@ namespace ClaudeModLib
                     if (win.visible)
                     {
                         var captured = win;
-                        win.rect = GUI.Window(win.id, win.rect, id =>
-                        {
-                            try { captured.draw(captured); }
-                            catch (Exception e) { GUILayout.Label(Lang.T("error: ", "出错：") + e.Message, Ui.small); }
-                            GUI.DragWindow(new Rect(0, 0, 10000, 22));
-                        }, win.title != null ? win.title.text : "");
+                        win.rect = Ui.Window(win.id, win.rect, win.title != null ? win.title.text : "", () => captured.draw(captured));
                     }
 
             if (LibPanel.visible) LibPanel.Draw(mods);
@@ -176,7 +235,7 @@ namespace ClaudeModLib
 
         internal static void Draw(List<ModHandle> mods)
         {
-            _rect = GUI.Window(0x434D4BFF, _rect, id => DrawContent(mods), "ClaudeModLib " + ModLib.Version);
+            _rect = Ui.Window(0x434D4BFF, _rect, "ClaudeModLib " + ModLib.Version, () => DrawContent(mods));
         }
 
         static string Txt(LocText t) { return t != null ? t.text : null; }
@@ -245,13 +304,38 @@ namespace ClaudeModLib
                 try { _status = Lang.T("Written: ", "已写入：") + DevTools.DumpAssets(); }
                 catch (Exception ex) { _status = Lang.T("Dump failed: ", "导出失败：") + ex.Message; }
             }
+            if (GUILayout.Button(Lang.T("Dump UI resources (sprites, fonts, native UI colours) → claudemodlib_ui_dump.txt",
+                                        "导出 UI 资源清单（图片、字体、原生界面配色）→ claudemodlib_ui_dump.txt"), Ui.button))
+            {
+                try { _status = Lang.T("Written: ", "已写入：") + DevTools.DumpUiResources(); }
+                catch (Exception ex) { _status = Lang.T("Dump failed: ", "导出失败：") + ex.Message; }
+            }
+
+            GUILayout.Space(8);
+            GUILayout.Label(Lang.T("Appearance", "外观"), Ui.header);
+            GUILayout.Label(Lang.T("Theme: ", "主题：") + (Theme.data != null ? Theme.data.name : "?"), Ui.label);
+            GUILayout.Label(Theme.filePath ?? "", Ui.small);
+            if (Theme.lastError != null) Ui.ColoredLabel(Lang.T("theme.json error: ", "theme.json 出错：") + Theme.lastError, Ui.Red);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(Lang.T("Reload theme", "重新加载主题"), Ui.button))
+            {
+                Theme.Reload();
+                _status = Theme.lastError == null ? Lang.T("Theme reloaded.", "主题已重新加载。") : Lang.T("theme.json has errors, kept previous theme.", "theme.json 有错误，保留了原主题。");
+            }
+            if (GUILayout.Button(Lang.T("Write current theme to theme.json", "把当前主题写入 theme.json"), Ui.button))
+            {
+                try { Theme.SaveCurrent(); _status = Lang.T("Written: ", "已写入：") + Theme.filePath; }
+                catch (Exception ex) { _status = ex.Message; }
+            }
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(6);
             GUILayout.Label(Lang.T("Panel hotkey: ", "面板快捷键：") + Hotkeys.Describe(Hotkeys.LibToggle)
                 + Lang.T(" (rebind it in the game's key-binding settings)", "（可在游戏设置的按键绑定里修改）"), Ui.small);
             if (_status != null) GUILayout.Label(_status, Ui.small);
 
             GUILayout.EndScrollView();
             if (GUILayout.Button(Lang.T("Close", "关闭"), Ui.button)) visible = false;
-            GUI.DragWindow(new Rect(0, 0, 10000, 22));
         }
     }
 }

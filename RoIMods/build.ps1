@@ -11,7 +11,7 @@ $Root    = $PSScriptRoot
 
 $refs = 'mscorlib','System','System.Core','netstandard','Assembly-CSharp','Assembly-CSharp-firstpass',
         'UnityEngine','UnityEngine.CoreModule','UnityEngine.ParticleSystemModule','0Harmony',
-        'UnityEngine.IMGUIModule','UnityEngine.TextRenderingModule','UnityEngine.UI','UnityEngine.UIModule' |
+        'UnityEngine.IMGUIModule','UnityEngine.TextRenderingModule','UnityEngine.UI','UnityEngine.UIModule','Unity.TextMeshPro','Newtonsoft.Json' |
         ForEach-Object { "$Managed\$_.dll" } | Where-Object { Test-Path $_ } | ForEach-Object { "/r:$_" }
 $LibDll = Join-Path (Split-Path $Root -Parent) 'ClaudeModLib\code\ClaudeModLib.dll'
 
@@ -59,11 +59,20 @@ foreach ($mod in $Mods) {
 
     # 3. Install: copy desc.json, code, assets, content into <Game>\Mods\<mod>
     $dst = Join-Path $Game "Mods\$mod"
+    # config\ holds user-editable files (e.g. theme.json): keep the installed copy across rebuilds.
+    $keep = $null
+    if (Test-Path (Join-Path $dst 'config')) {
+        $keep = Join-Path $env:TEMP "roimod_config_$mod"
+        if (Test-Path $keep) { Remove-Item $keep -Recurse -Force -Confirm:$false }
+        Copy-Item (Join-Path $dst 'config') $keep -Recurse
+    }
     if (Test-Path $dst) { Remove-Item $dst -Recurse -Force -Confirm:$false }
-    foreach ($d in 'code', 'assets', 'content') {
+    foreach ($d in 'code', 'assets', 'content', 'config') {
+        if ($d -eq 'config' -and -not (Test-Path (Join-Path $src $d)) -and -not $keep) { continue }
         New-Item -ItemType Directory -Force (Join-Path $dst $d) | Out-Null
         if (Test-Path (Join-Path $src $d)) { Copy-Item (Join-Path $src "$d\*") (Join-Path $dst $d) -Recurse -Force }
     }
+    if ($keep) { Copy-Item (Join-Path $keep '*') (Join-Path $dst 'config') -Recurse -Force; Remove-Item $keep -Recurse -Force -Confirm:$false; Write-Host "  (kept installed config\)" }
     Copy-Item (Join-Path $src 'desc.json') $dst -Force
     Get-ChildItem $dst -Recurse -File | ForEach-Object { '  ' + $_.FullName.Substring($dst.Length + 1) }
 }

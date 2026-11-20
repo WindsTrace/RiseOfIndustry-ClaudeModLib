@@ -11,7 +11,7 @@ using UnityEngine;
 namespace ClaudeModLib
 {
     /// <summary>Developer helpers: dump the game database, inspect objects and UI hierarchies.</summary>
-    public static class DevTools
+    public static partial class DevTools
     {
         /// <summary>Default dump path: %USERPROFILE%\AppData\LocalLow\Dapper Penguin Studios\Rise of Industry\claudemodlib_asset_dump.txt</summary>
         public static string DefaultDumpPath { get { return System.IO.Path.Combine(Application.persistentDataPath, "claudemodlib_asset_dump.txt"); } }

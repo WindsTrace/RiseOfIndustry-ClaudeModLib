@@ -44,9 +44,10 @@ function Make-Zip([string]$name, [string[]]$mods) {
         $src = $sources[$m]; $dst = Join-Path $stage $m
         New-Item -ItemType Directory -Force $dst | Out-Null
         Copy-Item (Join-Path $src 'desc.json') $dst
-        foreach ($d in 'code', 'assets', 'content') {
+        foreach ($d in 'code', 'assets', 'content', 'config') {
+            if (-not (Test-Path (Join-Path $src $d))) { if ($d -ne 'config') { New-Item -ItemType Directory -Force (Join-Path $dst $d) | Out-Null }; continue }
             New-Item -ItemType Directory -Force (Join-Path $dst $d) | Out-Null
-            if (Test-Path (Join-Path $src $d)) { Copy-Item (Join-Path $src "$d\*") (Join-Path $dst $d) -Recurse }
+            Copy-Item (Join-Path $src "$d\*") (Join-Path $dst $d) -Recurse
         }
     }
     Set-Content (Join-Path $stage 'INSTALL.txt') $install -Encoding UTF8

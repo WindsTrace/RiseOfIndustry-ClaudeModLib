@@ -1,4 +1,4 @@
-# ClaudeModLib API reference (v0.2.0)
+# ClaudeModLib API reference (v0.3.0)
 
 Namespace `ClaudeModLib`. Target: Rise of Industry 2.3.x (Unity 2018.4, Mono, .NET 4.x).
 Everything here was verified against the game's own code; see [GameMechanics.md](GameMechanics.md) for the why.
@@ -179,6 +179,34 @@ Use it instead of `GUILayout.Toggle` so the state is obvious:
 ```csharp
 _feature.enabled = Ui.Switch(_feature.enabled, Lang.T("Show window", "显示窗口"));
 ```
+
+`Ui.box` (themed row/box style) · `Rect Ui.Window(int id, Rect rect, string title, Action content)` — a themed,
+draggable window with title bar (what `ModHandle.AddWindow` uses).
+
+## Theme — appearance (`ClaudeModLib/config/theme.json`)
+
+Every lib window uses the theme. Players/modders edit `<game>\Mods\ClaudeModLib\config\theme.json` and press
+**Reload theme** in the panel (no restart). `build.ps1` keeps an installed `config\` across rebuilds.
+
+Surfaces `window, titleBar, box, button, buttonHover, buttonActive, progressBackground` are either a flat colour
+`{ "color": "#1C2B21F0" }` or a **game sprite** with tint `{ "sprite": "<name>", "tint": "#FFFFFFFF" }` — the sprite
+is copied out of its atlas and keeps its 9-slice border. Text colours: `titleText, text, subtext, header, buttonText`;
+switch: `switchOn, switchOff, switchKnob`; status: `good, bad, warn, info` (→ `Ui.Green/Red/Yellow/Blue`);
+`fonts` (OS font names, first found wins), `fontSize`, `titleBarHeight`. Comments (`//`) are allowed.
+
+To find native sprite names and colours: in a game with the native windows you like open, press
+**Dump UI resources** in the panel → `claudemodlib_ui_dump.txt` (all loaded sprites with size and 9-slice border,
+fonts, and every visible native UI element with its sprite and colour).
+
+| Member | Description |
+|---|---|
+| `ThemeData Theme.data` | Current values. |
+| `void Theme.Reload()` / `event Action Theme.reloaded` | Re-read the file (keeps the old theme on JSON errors, see `Theme.lastError`). |
+| `void Theme.SaveCurrent()` | Write the current theme to the file. |
+| `Color Theme.Col(string hex, Color fallback)` | Parse a theme colour. |
+| `string DevTools.DumpUiResources(string path = null)` | The UI dump described above. |
+
+Limitation: IMGUI cannot render the game's TextMeshPro fonts; text uses the OS font listed in `fonts`.
 
 ## Reflect — private members
 
