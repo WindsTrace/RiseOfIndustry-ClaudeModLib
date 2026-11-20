@@ -420,6 +420,56 @@ namespace ClaudeModLib
 
         static string Txt(LocText t) { return t != null ? t.text : null; }
 
+        static List<WorkshopJob> _jobs;
+        static string _armedJob;
+
+        // Steam Workshop publishing (developer feature; visible only when the jobs folder exists).
+        static void DrawWorkshop()
+        {
+            if (_jobs == null) _jobs = Workshop.LoadJobs();
+            GUILayout.Space(6);
+            if (Ui.SectionHeader(Lang.T("Steam Workshop upload", "Steam 创意工坊上传"),
+                Lang.T("Jobs are the .json files in:\n", "上传任务是这个文件夹里的 .json 文件：\n") + Workshop.JobsFolder.Replace('/', '\\') +
+                Lang.T("\n\nUploads run in the game with your Steam account. Click the icon to reload the jobs.",
+                       "\n\n上传在游戏内用你的 Steam 账号进行。点击图标重新读取任务。")))
+            { _jobs = Workshop.LoadJobs(); _armedJob = null; }
+
+            foreach (var j in _jobs)
+            {
+                GUILayout.BeginVertical(Ui.box);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(j.title, Ui.bold);
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(j.publishedFileId == 0 ? Lang.T("not published", "未发布") : "id " + j.publishedFileId + " · " + j.visibility, Ui.small);
+                GUILayout.EndHorizontal();
+                var problem = Workshop.Validate(j);
+                if (problem != null) Ui.ColoredLabel(problem, Ui.Red);
+                GUILayout.BeginHorizontal();
+                GUI.enabled = problem == null && !Workshop.busy;
+                bool armed = _armedJob == j.path;
+                string label = armed ? Lang.T("Click again to confirm upload", "再点一次确认上传")
+                                     : (j.publishedFileId == 0 ? Lang.T("Create & upload", "创建并上传") : Lang.T("Upload update", "上传更新"));
+                if (GUILayout.Button(label, Ui.button, GUILayout.Height(24)))
+                {
+                    if (armed) { _armedJob = null; Workshop.Publish(j); }
+                    else _armedJob = j.path;
+                }
+                GUI.enabled = j.publishedFileId != 0;
+                if (GUILayout.Button(Lang.T("Open page", "打开页面"), Ui.button, GUILayout.Width(90), GUILayout.Height(24)))
+                    Application.OpenURL(Workshop.ItemUrl(j.publishedFileId));
+                GUI.enabled = true;
+                GUILayout.EndHorizontal();
+                if (Workshop.current == j || (Workshop.current != null && Workshop.current.path == j.path))
+                {
+                    var p = Workshop.progress;
+                    if (Workshop.busy && p >= 0) Ui.ProgressBar(p, Ui.Green, 8);
+                    if (Workshop.status != null) GUILayout.Label(Workshop.status, Ui.small);
+                }
+                GUILayout.EndVertical();
+            }
+            if (_jobs.Count == 0) GUILayout.Label(Lang.T("No jobs found.", "没有找到上传任务。"), Ui.small);
+        }
+
         static void LangButton(LangMode m, string text)
         {
             var old = GUI.backgroundColor;
@@ -501,6 +551,8 @@ namespace ClaudeModLib
                 try { _status = Lang.T("Written: ", "已写入：") + DevTools.DumpUiResources(); }
                 catch (Exception ex) { _status = Lang.T("Dump failed: ", "导出失败：") + ex.Message; }
             }
+
+            if (Workshop.enabled) DrawWorkshop();
 
             GUILayout.Space(8);
             Ui.SectionHeader(Lang.T("Appearance", "外观"));

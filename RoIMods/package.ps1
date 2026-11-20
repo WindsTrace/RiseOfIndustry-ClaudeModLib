@@ -58,6 +58,22 @@ function Make-Zip([string]$name, [string[]]$mods) {
     "{0}  ({1:N0} KB): {2}" -f $name, ((Get-Item $zip).Length / 1KB), ($mods -join ', ')
 }
 
+# Steam Workshop content folders: one mod root per item (what subscribers get in workshop\content\671440\<id>\).
+function Stage-Workshop([string]$mod) {
+    $src = $sources[$mod]; $dst = Join-Path $Dist "workshop\$mod"
+    if (Test-Path $dst) { Remove-Item $dst -Recurse -Force -Confirm:$false }
+    New-Item -ItemType Directory -Force $dst | Out-Null
+    Copy-Item (Join-Path $src 'desc.json') $dst
+    foreach ($d in 'code', 'assets', 'content', 'config') {
+        if (-not (Test-Path (Join-Path $src $d))) { continue }
+        Copy-Item (Join-Path $src $d) $dst -Recurse
+    }
+    Get-ChildItem $dst -Recurse -Filter *.xml | Remove-Item -Force -Confirm:$false   # API docs: devs get them from GitHub
+    "workshop\{0}  ({1} files)" -f $mod, (Get-ChildItem $dst -Recurse -File).Count
+}
+
 New-Item -ItemType Directory -Force $Dist | Out-Null
 Make-Zip "ClaudeModLib-v$ver-toolkit.zip" @('ClaudeModLib')   # "toolkit" sorts before "with-mods" on the release page
 Make-Zip "ClaudeModLib-v$ver-with-mods.zip" @('ClaudeModLib', 'CityProgress', 'StarterChain')
+Stage-Workshop 'ClaudeModLib'
+Stage-Workshop 'CityProgress'

@@ -1,0 +1,51 @@
+[h1]CityProgress — city upgrade progress[/h1]
+
+A panel with every city's tier and how far its population is from the next tier, so you know where your deliveries pay off.
+
+[b]Requires ClaudeModLib[/b] (listed under Required items; Steam offers to subscribe it too).
+
+[h2]How to use[/h2]
+[list]
+[*]In a game, open the ClaudeModLib panel (gear button top-right, or [b]F9[/b]) and switch on [b]Show city progress window[/b]. Close it with the × in its title bar.
+[*]Each card: population, tier → next tier, the city's own threshold for the next tier, how much is missing, and the status:
+[list]
+[*][b]Growing[/b] — shops are consuming your goods.
+[*][b]Stagnant[/b] — not enough goods delivered.
+[*][b]At limit · needs a sponsor[/b] — someone has to own the region permit before the city can upgrade.
+[*][b]Upgrade contracts running[/b] — deliver the construction goods (Wall Panels, Bricks, Reinforced Walls).
+[/list]
+[*]Switch [b]Only cities I have supplied[/b] at the bottom of the window.
+[/list]
+
+[h2]How cities grow (from the game code)[/h2]
+Every 15 days shops consume delivered goods; each consumed product adds population (higher-tier products add more, up to 5 products count). Each city rolls its own threshold per tier (Village 125k–175k, Town 275k–325k, City 475k–525k, Metropolis 725k–775k). At the threshold growth stops until the upgrade contracts are completed.
+
+For Rise of Industry 2.3.x. Source: [url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+Written by [b]Claude[/b] (Anthropic); ideas, direction and testing by [b]WindsTrace[/b].
+
+[hr][/hr]
+
+[h1]CityProgress — 城市升级进度[/h1]
+
+显示每座城市的当前等级，以及人口距离下一等级还差多少，让你知道往哪里送货最有效。
+
+[b]需要 ClaudeModLib[/b]（已列为“必需物品”，订阅时 Steam 会提示一起订阅）。
+
+[h2]使用方法[/h2]
+[list]
+[*]进入对局后打开 ClaudeModLib 面板（右上角齿轮按钮或 [b]F9[/b]），打开[b]“显示城市升级进度窗口”[/b]。点标题栏的 × 关闭。
+[*]每张卡片显示：总人口、当前等级 → 下一等级、这座城市自己的下一级门槛、还差多少，以及状态：
+[list]
+[*][b]成长中[/b] —— 商店正在消耗你送的商品。
+[*][b]停滞[/b] —— 送货不够。
+[*][b]已封顶·等待赞助[/b] —— 需要有人持有该区许可证，城市才能升级。
+[*][b]升级任务进行中[/b] —— 去送建材（墙板、砖块、加固墙）。
+[/list]
+[*]窗口底部可以切换[b]“只显示我供过货的城市”[/b]。
+[/list]
+
+[h2]城市如何成长（来自游戏代码）[/h2]
+商店每 15 天消耗一次送到的商品，每种被消耗的商品都会增加人口（高级商品加得更多，每次最多计 5 种）。每座城市对每个等级会随机一个自己的门槛（村镇 12.5万–17.5万、城镇 27.5万–32.5万、城市 47.5万–52.5万、大都市 72.5万–77.5万）。到达门槛后人口停止增长，直到完成升级任务。
+
+适用于《工业崛起》2.3.x。源码：[url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+全部代码由 [b]Claude[/b]（Anthropic）编写；思路、方向与测试由 [b]WindsTrace[/b] 提供。

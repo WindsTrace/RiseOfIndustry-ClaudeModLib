@@ -1,0 +1,49 @@
+[h1]ClaudeModLib — modding toolkit for Rise of Industry[/h1]
+
+A shared base for mods: a native-looking [b]mod panel[/b] in the top-right toolbar, feature switches, mod list, themes and an API for mod developers. On its own it changes nothing in your game; mods built on it (like [b]CityProgress[/b]) use it.
+
+[h2]How to use[/h2]
+[list]
+[*]Subscribe, start the game and open a map.
+[*]Click the [b]gear[/b] button in the top-right toolbar, or press [b]F9[/b] (rebindable in the game's key-binding settings).
+[*]In the panel: switch mod features on/off, see which mods are loaded, enable/disable mods for the next start.
+[*]Language: [b]Auto[/b] (follows the game) / [b]English[/b] / [b]简体中文[/b].
+[/list]
+
+[h2]For mod developers[/h2]
+Typed APIs for game data, cities (tier, threshold, progress), shops, tech trees, building clones, hotkeys, themed IMGUI windows, bilingual texts, asset dumps and an in-game Workshop publisher.
+Source, API reference and verified engine notes: [url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+
+[h2]Notes[/h2]
+[list]
+[*]For Rise of Industry 2.3.x. Enabling mods disables Steam achievements (game rule).
+[*]If you installed ClaudeModLib manually before, delete [i]RiseOfIndustry\Mods\ClaudeModLib[/i] — two copies with the same name conflict.
+[/list]
+
+Written by [b]Claude[/b] (Anthropic); ideas, direction and testing by [b]WindsTrace[/b].
+
+[hr][/hr]
+
+[h1]ClaudeModLib —《工业崛起》模组工具包[/h1]
+
+各个 mod 共用的基础：右上角工具栏里原生风格的[b]模组面板[/b]、功能开关、模组列表、主题，以及给开发者的 API。单独订阅不会改变游戏内容；基于它的 mod（例如 [b]CityProgress[/b]）会用到它。
+
+[h2]使用方法[/h2]
+[list]
+[*]订阅后启动游戏，进入一局。
+[*]点右上角工具栏的[b]齿轮[/b]按钮，或按 [b]F9[/b]（可在游戏按键设置中修改）。
+[*]面板里可以：开关各 mod 的功能、查看已加载的 mod、设置下次启动时启用/禁用哪些 mod。
+[*]语言：[b]自动[/b]（跟随游戏）/ [b]English[/b] / [b]简体中文[/b]。
+[/list]
+
+[h2]给模组开发者[/h2]
+提供游戏数据、城市（等级、门槛、进度）、商店、科技树、建筑克隆、快捷键、主题化窗口、双语文本、资源导出和游戏内创意工坊上传等 API。
+源码、API 文档和机制说明：[url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+
+[h2]注意[/h2]
+[list]
+[*]适用于《工业崛起》2.3.x。启用 mod 会禁用 Steam 成就（游戏规则）。
+[*]如果之前手动安装过 ClaudeModLib，请删除 [i]RiseOfIndustry\Mods\ClaudeModLib[/i]，两份同名 mod 会冲突。
+[/list]
+
+全部代码由 [b]Claude[/b]（Anthropic）编写；思路、方向与测试由 [b]WindsTrace[/b] 提供。
