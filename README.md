@@ -21,6 +21,7 @@ Not affiliated with Dapper Penguin Studios / Kasedo Games. No game files are inc
 | [**ClaudeModLib** — modding toolkit](https://steamcommunity.com/sharedfiles/filedetails/?id=3843162963) | the toolkit / 工具包 |
 | [**CityProgress** — city upgrade progress](https://steamcommunity.com/sharedfiles/filedetails/?id=3843163232) | requires ClaudeModLib / 需要工具包 |
 | [**FirstVillageStoreChoice** — choose the starting village's shop](https://steamcommunity.com/sharedfiles/filedetails/?id=3844222083) | requires ClaudeModLib / 需要工具包 |
+| **ChineseCityNamesBilingual** — city names "北京 Běijīng", State in Beijing | standalone / 独立 (coming to the Workshop) |
 
 Don't keep a manual copy in `Mods\` and a Workshop subscription of the same mod at the same time (same name → conflict).
 不要同时保留 `Mods\` 里的手动安装版和创意工坊订阅版（同名会冲突）。
@@ -60,6 +61,10 @@ Mods built on the lib:
   place your HQ in its region, a banner appears, accept the native upgrade offer and pick the shop yourself
   (no contracts, no time limit). HQ elsewhere = the vanilla random shop. Applies to new games.
   开局已升级的村镇不再随机获得二级商店：把总部放在它的区，按横幅提示接受原生升级并自选商店；总部放在别处则与原版相同。
+- **ChineseCityNamesBilingual** — new-game city-name option "CHINA 汉字+PINYIN": Chinese + pinyin names
+  (北京 Běijīng …) readable in any game language, and the State is always in Beijing. City list from
+  [Chinese Cities Names](https://steamcommunity.com/sharedfiles/filedetails/?id=1604285430) by 兔子.
+  Third-tone vowels use ă ĭ ŏ ŭ because the game's map font lacks ǎ ǐ ǒ ǔ. 中文城市名 + 拼音，政府固定在北京。
 - **StarterChain** — example production chain: 2 Steel + 1 Light Bulb → Toy Robot in a new *Toy Robot Workshop*,
   researched on a new *Robotics* tech-tree page.
 
@@ -70,7 +75,8 @@ Mods built on the lib:
 | [`ClaudeModLib/`](ClaudeModLib) | The library. |
 | [`CityProgress/`](CityProgress) | City progress window (example mod). |
 | [`FirstVillageStoreChoice/`](FirstVillageStoreChoice) | Choose the starting village's shop (example of Harmony patches + native upgrade flow + event banner). |
-| [`workshop/`](workshop) | Steam Workshop descriptions (BBCode, English + Chinese). |
+| [`ChineseCityNamesBilingual/`](ChineseCityNamesBilingual) | City-name list + a tiny world-generation postfix (State region renamed to Beijing). |
+| [`workshop/`](workshop) | Steam Workshop descriptions (BBCode, English + Chinese) and preview images. |
 | [`RoIMods/StarterChain/`](RoIMods/StarterChain) | Example production chain. |
 | [`RoIMods/AssetDump/`](RoIMods/AssetDump) | Dev harness used by `run-test.ps1` (dumps assets at start-up, keeps dev mods enabled). Not shipped. |
 | [`RoIMods/build.ps1`](RoIMods/build.ps1) · [`run-test.ps1`](RoIMods/run-test.ps1) · [`package.ps1`](RoIMods/package.ps1) | Build with the .NET Framework `csc.exe` (no Visual Studio needed) and install into the game · restart the game and print mod log lines · build the two release zips into `dist/`. |

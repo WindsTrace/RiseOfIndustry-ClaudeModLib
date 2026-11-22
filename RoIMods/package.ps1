@@ -1,4 +1,4 @@
-# Builds the release zips into <repo>\dist (not committed; upload them to a GitHub Release):
+﻿# Builds the release zips into <repo>\dist (not committed; upload them to a GitHub Release):
 #   ClaudeModLib-v<ver>-toolkit.zip    toolkit only (default download)
 #   ClaudeModLib-v<ver>-with-mods.zip  toolkit + CityProgress + StarterChain
 # and stages Steam Workshop content folders into <repo>\dist\workshop\<mod>.
@@ -10,7 +10,7 @@ $Repo = Split-Path $PSScriptRoot -Parent
 $Dist = Join-Path $Repo 'dist'
 
 # Compile everything first (compile only: the game may keep running).
-& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'build.ps1') -Mods 'ClaudeModLib,CityProgress,StarterChain,FirstVillageStoreChoice' -NoInstall
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'build.ps1') -Mods 'ClaudeModLib,CityProgress,StarterChain,FirstVillageStoreChoice,ChineseCityNamesBilingual' -NoInstall
 if ($LASTEXITCODE -ne 0) { throw 'build failed' }
 
 $ver = (Get-Content (Join-Path $Repo 'ClaudeModLib\desc.json') -Raw | ConvertFrom-Json).versionString
@@ -19,6 +19,7 @@ $sources = @{
     'CityProgress' = Join-Path $Repo 'CityProgress'
     'StarterChain' = Join-Path $Repo 'RoIMods\StarterChain'
     'FirstVillageStoreChoice' = Join-Path $Repo 'FirstVillageStoreChoice'
+    'ChineseCityNamesBilingual' = Join-Path $Repo 'ChineseCityNamesBilingual'
 }
 
 $install = @"
@@ -84,3 +85,4 @@ if (-not $WorkshopOnly) {
 Stage-Workshop 'ClaudeModLib'
 Stage-Workshop 'CityProgress'
 Stage-Workshop 'FirstVillageStoreChoice'
+Stage-Workshop 'ChineseCityNamesBilingual'

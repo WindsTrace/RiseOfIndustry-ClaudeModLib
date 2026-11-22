@@ -1,0 +1,39 @@
+[h1]ChineseCityNamesBilingual — Chinese city names with pinyin[/h1]
+
+City names for new maps in [b]Chinese + pinyin[/b], e.g. [b]北京 Běijīng[/b], [b]芜湖 Wúhú[/b], [b]乌鲁木齐 Wūlŭmùqí[/b] — readable for Chinese and non-Chinese players alike, whatever language your game is set to. The [b]State[/b] is always in [b]北京 Běijīng[/b].
+
+[h2]Based on "Chinese Cities Names" by 兔子[/h2]
+The city list comes from [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1604285430]Chinese Cities Names[/url] by [b]兔子[/b] — thank you! That mod shows Chinese only; this one adds pinyin and keeps the original untouched (you can have both; they are separate choices in the new-game settings).
+
+[h2]How to use[/h2]
+[list]
+[*]Start a [b]new game[/b] and choose [b]CHINA 汉字+PINYIN[/b] as the city names option.
+[*]89 cities. Hong Kong, Macau, Taipei, Kaohsiung and Hualien use their established English names.
+[*]Third-tone vowels are written ă ĭ ŏ ŭ: the game's map font has no ǎ ǐ ǒ ǔ, and these look nearly the same.
+[*]The State is placed in Beijing by renaming its region at map generation (if another region drew Beijing, the two swap names). Names only — gameplay and logistics are unchanged.
+[*]Does not need ClaudeModLib. Existing saves keep their names. For Rise of Industry 2.3.x.
+[/list]
+
+Source: [url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+Written by [b]Claude[/b] (Anthropic); ideas, direction and testing by [b]WindsTrace[/b]; city list by [b]兔子[/b].
+
+[hr][/hr]
+
+[h1]ChineseCityNamesBilingual — 中文城市名 + 拼音[/h1]
+
+新地图的城市名采用[b]汉字 + 拼音[/b]，例如 [b]北京 Běijīng[/b]、[b]芜湖 Wúhú[/b]、[b]乌鲁木齐 Wūlŭmùqí[/b]。无论游戏设成什么语言，中文和非中文玩家都能看懂。[b]政府（State）固定在北京[/b]。
+
+[h2]基于兔子的《Chinese Cities Names》[/h2]
+城市名单来自 [b]兔子[/b] 的 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1604285430]Chinese Cities Names[/url]，感谢原作者！原 mod 只显示中文，本 mod 加上了拼音，原 mod 保持不变（两者可以同时订阅，在新游戏设置里是两个独立选项）。
+
+[h2]使用方法[/h2]
+[list]
+[*]开一局[b]新游戏[/b]，城市名称选项选择 [b]CHINA 汉字+PINYIN[/b]。
+[*]共 89 座城市。香港、澳门、台北、高雄、花莲使用国际通用的英文名。
+[*]第三声写作 ă ĭ ŏ ŭ：游戏地图字体没有 ǎ ǐ ǒ ǔ，这两种写法外观几乎相同。
+[*]生成地图时会把政府所在地区命名为北京（如果别的地区抽到了北京，两者互换名字）。只改名字，不影响玩法和物流。
+[*]不需要 ClaudeModLib。已有存档保持原名。适用于《工业崛起》2.3.x。
+[/list]
+
+源码：[url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+代码由 [b]Claude[/b]（Anthropic）编写；思路、方向与测试由 [b]WindsTrace[/b] 提供；城市名单来自 [b]兔子[/b]。
