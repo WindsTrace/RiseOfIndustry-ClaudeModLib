@@ -21,7 +21,7 @@ Not affiliated with Dapper Penguin Studios / Kasedo Games. No game files are inc
 | [**ClaudeModLib** — modding toolkit](https://steamcommunity.com/sharedfiles/filedetails/?id=3843162963) | the toolkit / 工具包 |
 | [**CityProgress** — city upgrade progress](https://steamcommunity.com/sharedfiles/filedetails/?id=3843163232) | requires ClaudeModLib / 需要工具包 |
 | [**FirstVillageStoreChoice** — choose the starting village's shop](https://steamcommunity.com/sharedfiles/filedetails/?id=3844222083) | requires ClaudeModLib / 需要工具包 |
-| **ChineseCityNamesBilingual** — city names "北京 Běijīng", State in Beijing | standalone / 独立 (coming to the Workshop) |
+| [**ChineseCityNamesBilingual** — city names "北京 Běijīng", State in Beijing](https://steamcommunity.com/sharedfiles/filedetails/?id=3844252287) | standalone / 独立 |
 
 Don't keep a manual copy in `Mods\` and a Workshop subscription of the same mod at the same time (same name → conflict).
 不要同时保留 `Mods\` 里的手动安装版和创意工坊订阅版（同名会冲突）。
