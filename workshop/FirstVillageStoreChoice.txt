@@ -1,0 +1,53 @@
+[h1]FirstVillageStoreChoice — choose your starting village's shop[/h1]
+
+Every new map has one city that starts already upgraded to a Village, and the game gives it a [b]random[/b] second-tier shop. With this mod [b]you[/b] choose that shop — using the game's own upgrade window.
+
+[b]Requires ClaudeModLib[/b] (listed under Required items; Steam offers to subscribe it too).
+
+[h2]How it works[/h2]
+[list]
+[*]Start a [b]new game[/b]. The pre-upgraded village has no second-tier shop yet.
+[*]Place your [b]HQ in that village's region[/b]: a banner "Choose your village's shop" appears for one month and an upgrade icon shows above its town center.
+[*]Accept it, then pick the shop in the native upgrade panel. No contracts, no time limit — take your time. The shop is built right away.
+[*]Place your HQ [b]anywhere else[/b] and the village simply gets a random shop, exactly like the vanilla game.
+[/list]
+Which shops are offered depends on the city type, just like in the game (Grocery, Clothing, Toy, Ironmongery, Construction).
+
+[h2]Notes[/h2]
+[list]
+[*]Only affects new games; existing saves are untouched. Turn it off in the ClaudeModLib panel (gear button top-right / F9) to play vanilla.
+[*]While you choose, the upgrade panel shows the city one tier lower (that is how the native upgrade flow works); it becomes a Village again with your shop.
+[*]Chinese game text calls both Hamlet and Village "村庄" — that is the game's translation, not this mod.
+[*]For Rise of Industry 2.3.x. Enabling mods disables Steam achievements (game rule).
+[/list]
+
+Source: [url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+Written by [b]Claude[/b] (Anthropic); ideas, direction and testing by [b]WindsTrace[/b].
+
+[hr][/hr]
+
+[h1]FirstVillageStoreChoice — 开局村镇商店自选[/h1]
+
+每张新地图都有一座开局就已升级为村镇的城市，游戏会[b]随机[/b]给它一家二级商店。装了这个 mod，由[b]你自己[/b]在游戏原生的升级界面里选择这家商店。
+
+[b]需要 ClaudeModLib[/b]（已列为“必需物品”，订阅时 Steam 会提示一起订阅）。
+
+[h2]玩法[/h2]
+[list]
+[*]开一局[b]新游戏[/b]：那座开局已升级的村镇暂时没有二级商店。
+[*]把[b]总部放在它所在的区[/b]：右侧出现持续一个月的横幅“选择村镇的二级商店”，城镇中心上方出现升级图标。
+[*]接受后在原生升级面板里选择商店。没有合同、没有时间限制，慢慢挑；选完商店立即建成。
+[*]总部放在[b]别的区[/b]：这座村镇直接获得一家随机商店，和原版完全一样。
+[/list]
+可选的商店和游戏一样取决于城市类型（杂货店、服装店、玩具店、铁器店、建材店）。
+
+[h2]注意[/h2]
+[list]
+[*]只影响新开的游戏，已有存档不受影响。可在 ClaudeModLib 面板（右上角齿轮 / F9）关闭，恢复原版。
+[*]选择期间升级面板会把这座城市显示为低一级（原生升级流程就是这样运作的），选完后会以村镇身份建好你选的商店。
+[*]游戏中文版把小村和村镇都译作“村庄”，这是游戏本身的翻译，不是 mod 的问题。
+[*]适用于《工业崛起》2.3.x。启用 mod 会禁用 Steam 成就（游戏规则）。
+[/list]
+
+源码：[url=https://github.com/WindsTrace/RiseOfIndustry-ClaudeModLib]github.com/WindsTrace/RiseOfIndustry-ClaudeModLib[/url]
+全部代码由 [b]Claude[/b]（Anthropic）编写；思路、方向与测试由 [b]WindsTrace[/b] 提供。

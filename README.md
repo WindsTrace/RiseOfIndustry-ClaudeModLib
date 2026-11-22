@@ -20,6 +20,7 @@ Not affiliated with Dapper Penguin Studios / Kasedo Games. No game files are inc
 |---|---|
 | [**ClaudeModLib** — modding toolkit](https://steamcommunity.com/sharedfiles/filedetails/?id=3843162963) | the toolkit / 工具包 |
 | [**CityProgress** — city upgrade progress](https://steamcommunity.com/sharedfiles/filedetails/?id=3843163232) | requires ClaudeModLib / 需要工具包 |
+| **FirstVillageStoreChoice** — choose the starting village's second-tier shop | requires ClaudeModLib / 需要工具包 (coming to the Workshop) |
 
 Don't keep a manual copy in `Mods\` and a Workshop subscription of the same mod at the same time (same name → conflict).
 不要同时保留 `Mods\` 里的手动安装版和创意工坊订阅版（同名会冲突）。
@@ -46,13 +47,19 @@ Enabling mods disables Steam achievements (game rule). 启用 mod 会禁用成�
 - **Languages / 语言:** *Auto* (follows the game language), *English*, *简体中文* — switch in the panel.
   Non-Chinese players never see Chinese text. Mods built on the lib get the same switch via `Lang` / `LocText`.
 - **Rebindable hotkeys** through the game's own input system.
-- **Typed APIs** for game data, cities (tier / threshold / progress), shops, tech trees, building clones,
-  mod assets, reflection, IMGUI widgets, dev tools — see [docs/API.md](docs/API.md).
+- **Typed APIs** for game data, cities (tier / threshold / progress / tier shops), the player and HQ, world-event
+  banners, shops, tech trees, building clones, Harmony patching, mod assets, reflection, IMGUI widgets, dev tools —
+  see [docs/API.md](docs/API.md).
+- **Keeps itself first in the load order** (works around a game bug that can load a mod before the library it needs).
 
-Included example mods (in the *with-mods* zip):
+Mods built on the lib:
 
 - **CityProgress** — window with every city's tier and population progress to the next tier, with status
-  (growing / at limit / waiting for sponsor / upgrading). Toggle it in the panel.
+  (growing / at limit / waiting for sponsor / upgrading). Open it from the panel; close it with ×.
+- **FirstVillageStoreChoice** — the one city that starts pre-upgraded no longer gets a random second-tier shop:
+  place your HQ in its region, a banner appears, accept the native upgrade offer and pick the shop yourself
+  (no contracts, no time limit). HQ elsewhere = the vanilla random shop. Applies to new games.
+  开局已升级的村镇不再随机获得二级商店：把总部放在它的区，按横幅提示接受原生升级并自选商店；总部放在别处则与原版相同。
 - **StarterChain** — example production chain: 2 Steel + 1 Light Bulb → Toy Robot in a new *Toy Robot Workshop*,
   researched on a new *Robotics* tech-tree page.
 
@@ -62,12 +69,14 @@ Included example mods (in the *with-mods* zip):
 |---|---|
 | [`ClaudeModLib/`](ClaudeModLib) | The library. |
 | [`CityProgress/`](CityProgress) | City progress window (example mod). |
+| [`FirstVillageStoreChoice/`](FirstVillageStoreChoice) | Choose the starting village's shop (example of Harmony patches + native upgrade flow + event banner). |
+| [`workshop/`](workshop) | Steam Workshop descriptions (BBCode, English + Chinese). |
 | [`RoIMods/StarterChain/`](RoIMods/StarterChain) | Example production chain. |
 | [`RoIMods/AssetDump/`](RoIMods/AssetDump) | Dev harness used by `run-test.ps1` (dumps assets at start-up, keeps dev mods enabled). Not shipped. |
 | [`RoIMods/build.ps1`](RoIMods/build.ps1) · [`run-test.ps1`](RoIMods/run-test.ps1) · [`package.ps1`](RoIMods/package.ps1) | Build with the .NET Framework `csc.exe` (no Visual Studio needed) and install into the game · restart the game and print mod log lines · build the two release zips into `dist/`. |
 | [`docs/API.md`](docs/API.md) | ClaudeModLib API reference. |
-| [`docs/GameMechanics.md`](docs/GameMechanics.md) | Verified engine facts: mod loading, JSON content pitfalls, shops, city growth/upgrades, toolbar. |
-| [`tools/`](tools) | PowerShell API discovery: list type members, read method IL calls, check whether an old mod DLL still matches the current game. |
+| [`docs/GameMechanics.md`](docs/GameMechanics.md) | Verified engine facts: mod loading and its load-order bug, JSON content pitfalls, shops, city growth, the upgrade state machine, map generation, world events, toolbar. |
+| [`tools/`](tools) | PowerShell, no decompiler needed: `Dump-Types` (type members), `Show-ILCalls` (what a method calls), `Find-Usages` (who calls/reads a member), `Test-ModCompat` (does an old mod DLL still fit this game version), `Make-Icon` / `Make-Previews`. |
 
 ## Quick start (mod developers)
 

@@ -1,14 +1,24 @@
-# ClaudeModLib API reference (v0.3.0)
+# ClaudeModLib API reference (v0.4.0)
 
 Namespace `ClaudeModLib`. Target: Rise of Industry 2.3.x (Unity 2018.4, Mono, .NET 4.x).
 Everything here was verified against the game's own code; see [GameMechanics.md](GameMechanics.md) for the why.
 
-To use it, add the dependency in your `desc.json` (this makes the game load the lib first) and reference
-`ClaudeModLib.dll` when compiling:
+**Contents:** [ModLib](#modlib--registration-lifecycle) · [Lang](#lang--loctext--english--简体中文) ·
+[Data](#data--the-game-database-gamedata) · [ModAssets](#modassets--the-mod-asset-table) ·
+[Content](#content--what-json-cannot-fully-do) · [Cities](#cities--settlement-growth) · [Players](#players--the-local-player-and-hq) ·
+[Events](#events--banners-on-the-right) · [Shops](#shops--product-selection) · [Mods](#mods--enable-state) ·
+[Hotkeys](#hotkeys--rebindable-keys-via-the-games-input-system) · [Ui](#ui--imgui-helpers) · [Theme](#theme--appearance-claudemodlibconfigthemejson) ·
+[Patching](#patching--harmony-helpers) · [Workshop](#workshop--steam-workshop-publisher) · [Reflect](#reflect--private-members) ·
+[DevTools](#devtools) · [Log](#log) · [Writing a mod](#writing-a-mod--checklist)
+
+To use it, add the dependency in your `desc.json` and reference `ClaudeModLib.dll` when compiling:
 
 ```json
 { "name": "MyMod", "author": "...", "version": 1, "versionString": "1.0.0", "dependencies": ["ClaudeModLib"] }
 ```
+
+The game's dependency ordering is unreliable (it re-sorts by saved `ModOrder_*` numbers, see GameMechanics.md);
+ClaudeModLib therefore pins its own load order to `ModLib.LoadOrder` (-100) so it always loads first.
 
 ---
 
@@ -126,9 +136,41 @@ Files in `assets/` are registered by file name: `.png`→Texture2D, `.svg`→SVG
 | `IActor Player` | The human player (for sales/delivery queries). |
 | `CityInfo GetInfo(SettlementBase)` | Snapshot: `name, population, tier, nextTier, tierThreshold, nextTierThreshold, progress (0..1), remaining, status, shopCount`. Thresholds are the city's own rolled values. |
 | `bool HasSupplied(SettlementBase, IActor)` | Any shop of the city has sales/deliveries by that actor. |
-| `List<SettlementTier> Tiers()` | Tier table ordered by id. |
+| `List<SettlementTier> Tiers()` / `SettlementTier TierById(int)` | Tier table ordered by id. |
+| `const int Hamlet=100, Village=200, Town=300, City=400, Metropolis=500, Bloated=1000` | Tier ids. |
+| `string TierName(SettlementTier)` | Tier name in the current language **by tierId**. Don't compare `tier.tierName`: the game's Chinese text is "村庄" for both Hamlet and Village. |
+| `List<Shop> ShopsForTier(SettlementBase, SettlementTier)` | Shop prefabs this city type can get at a tier (what the game picks from). |
+| `bool HasTierShop(SettlementBase, SettlementTier)` | One of that tier's shops is built or queued. |
+| `void BuildShop(SettlementBase, Shop)` | Ask the city to build a shop — the same call the game makes after an upgrade. |
 
 `CityStatus`: `Growing, Stagnant, LimitReached, WaitingForSponsor, Advancing, MaxTier, Dead`.
+
+## Players — the local player and HQ
+
+| Member | Description |
+|---|---|
+| `Player Local` / `IActor Actor` | The human player (null outside a game). |
+| `bool HqBuilt` / `Building Hq` / `Region HqRegion` | HQ state. **No HQ exists at map generation** — the player places it after looking at the map. |
+| `bool OwnsPermit(Region)` | The local player owns the region permit (the "sponsor" of city upgrades there). |
+
+## Events — banners on the right
+
+World events are the right-side banners (news, weather, "Settlement Leveled Up").
+
+```json
+{ "type": "ProjectAutomata.ContentCreationModels.CCWorldEventDataModel",
+  "object": { "name": "MyMod_Notice_en", "displayName": "Something happened", "description": "...",
+              "svgIcon": "mymod_icon", "type": "Good", "when": 0,
+              "easy":   { "durationMin": 30, "durationMax": 30, "effects": [] },
+              "normal": { "durationMin": 30, "durationMax": 30, "effects": [] },
+              "hard":   { "durationMin": 30, "durationMax": 30, "effects": [] } } }
+```
+
+| Member | Description |
+|---|---|
+| `void MakeManual(params string[] events)` | **Call in OnAllModsLoaded.** JSON cannot set `triggerMode`; without this the random event scheduler may fire your event on its own. |
+| `bool Show(string event, Region region = null, int days = 0)` | Show the banner for the local player (days 0 = event's own duration). |
+| `bool ShowLocalized(string en, string zh, Region region = null, int days = 0)` | Pick the English / Chinese event by `Lang`. Event texts are static: make one event per language. |
 
 ## Shops — product selection
 
@@ -219,6 +261,41 @@ fonts, and every visible native UI element with its sprite and colour).
 
 Limitation: IMGUI cannot render the game's TextMeshPro fonts; text uses the OS font listed in `fonts`.
 
+## Patching — Harmony helpers
+
+The game ships **Harmony 1.x** (`0Harmony.dll`, namespace `Harmony`). Patch parameters are matched **by name**: use the
+original method's parameter names, plus `__instance` and `__result`. A prefix returning `false` skips the original.
+
+| Member | Description |
+|---|---|
+| `MethodInfo Method(Type root, string typePath, string method)` | Any-visibility lookup, nested types via `"Outer+Inner"`, e.g. `Method(typeof(SettlementAdvancement), "AcceptState", "Initialize")`. |
+| `void Apply(HarmonyInstance h, MethodBase original, Type patchClass, string prefix, string postfix)` | Patch with static methods of `patchClass` (either name may be null). |
+
+```csharp
+var h = HarmonyInstance.Create("me.mymod");
+Patching.Apply(h, Patching.Method(typeof(UrbanAreaInitialBuilder), "BuildTierShops"), typeof(MyPatches), "Prefix", null);
+// static bool Prefix(UrbanAreaInitialBuilder __instance, SettlementTier tier) { ... return true; }
+```
+
+Patch in `OnAllModsLoaded`, wrap patch bodies in try/catch (an exception inside a patch breaks the game method), and
+prefer postfixes. See `FirstVillageStoreChoice/src` for a complete example (prefix + two postfixes on private nested classes).
+
+## Workshop — Steam Workshop publisher
+
+In-game uploader using the game's Steamworks.NET (the 2018 official uploader is gone). Active only when the folder
+`<LocalLow>\Dapper Penguin Studios\Rise of Industry\claudemodlib_workshop\` exists; each `*.json` there is a job and gets
+a section in the lib panel (two-click upload, progress, "Open page").
+
+```json
+{ "title": "My Mod", "descriptionFile": "D:/mods/workshop/MyMod.txt", "contentFolder": "D:/mods/dist/workshop/MyMod",
+  "previewImage": "D:/mods/dist/preview/MyMod.png", "visibility": "private", "changeNote": "first upload",
+  "tags": [], "publishedFileId": 0, "requiredItems": [ 3843162963 ] }
+```
+
+`publishedFileId` 0 creates the item and the id is written back; later uploads update it. `requiredItems` become
+"Required items" on the Workshop page (3843162963 = ClaudeModLib). `contentFolder` must contain `desc.json`;
+the preview must be under 1 MB. API: `Workshop.LoadJobs()`, `Validate(job)`, `Publish(job)`, `status`, `progress`, `ItemUrl(id)`.
+
 ## Reflect — private members
 
 `Get(obj, name)`, `Get<T>`, `GetOr<T>(obj, name, fallback)`, `Set(obj, name, value)`, `GetStatic(type, name)`,
@@ -232,7 +309,23 @@ Limitation: IMGUI cannot render the game's TextMeshPro fonts; text uses the OS f
 | `string DescribeObject(object)` | All fields incl. private/backing fields. |
 | `string DescribeHierarchy(GameObject, int maxDepth = 6)` | GameObject tree with component names (find UI elements). |
 | `string Describe(object)` | One-line value description. |
+| `string DumpUiResources(string path = null)` | Loaded sprites (size, 9-slice border), fonts, visible native UI with sprites/colours → `claudemodlib_ui_dump.txt`. |
+
+Outside the game, `tools/` has PowerShell scripts that need no decompiler:
+`Dump-Types.ps1` (members of game types), `Show-ILCalls.ps1` (calls/fields/strings inside a method),
+`Find-Usages.ps1` (every game method that references a member), `Test-ModCompat.ps1` (does an old mod DLL still
+match this game version), `Make-Icon.ps1` / `Make-Previews.ps1` (toolbar icon, Workshop previews).
 
 ## Log
 
 `Log.Info / Warn / Error(string)` → `output_log.txt` with prefix `[ClaudeModLib]`.
+
+## Writing a mod — checklist
+
+1. `desc.json` with `"dependencies": ["ClaudeModLib"]`; reference `ClaudeModLib.dll` (and game DLLs from `Managed\`).
+2. `OnModWasLoaded`: `ModLib.Register`, features, windows; anything JSON content must see (`Content.CloneBuilding`,
+   `ModAssets.Register`). `OnAllModsLoaded`: everything that needs content (recipes, tech tree, `Events.MakeManual`, Harmony patches).
+3. All UI text through `Lang.T(en, zh)` / `LocText`; "window open" switches with `persistent: false`.
+4. Asset names, not display names (`DevTools.DumpAssets`); tiers by id (`Cities.TierName`).
+5. Never throw out of `OnModWasLoaded`/`OnAllModsLoaded`/patches: one exception disables mods and stops loading the rest.
+6. Build: `RoIMods\build.ps1 -Mods "ClaudeModLib,MyMod"`; test: `RoIMods\run-test.ps1 -Build MyMod` (restarts the game, prints mod log lines).

@@ -112,6 +112,54 @@ namespace ClaudeModLib
             return false;
         }
 
+        /// <summary>Tier ids: 100 Hamlet, 200 Village, 300 Town, 400 City, 500 Metropolis, 1000 Bloated.</summary>
+        public const int Hamlet = 100, Village = 200, Town = 300, City = 400, Metropolis = 500, Bloated = 1000;
+
+        /// <summary>
+        /// Tier name in the current <see cref="Lang"/>, by tierId. Do not use SettlementTier.tierName to tell tiers apart:
+        /// the game's Chinese translation uses "村庄" for both Hamlet and Village.
+        /// </summary>
+        public static string TierName(SettlementTier tier)
+        {
+            if (tier == null) return "?";
+            switch (tier.tierId)
+            {
+                case Hamlet: return Lang.T("Hamlet", "村庄");
+                case Village: return Lang.T("Village", "村镇");
+                case Town: return Lang.T("Town", "城镇");
+                case City: return Lang.T("City", "城市");
+                case Metropolis: return Lang.T("Metropolis", "大都市");
+                case Bloated: return Lang.T("Bloated", "超大都市");
+                default: return tier.tierName;
+            }
+        }
+
+        public static SettlementTier TierById(int tierId)
+        {
+            foreach (var t in Tiers()) if (t.tierId == tierId) return t;
+            return null;
+        }
+
+        /// <summary>Shop prefabs this city's type can have at <paramref name="tier"/> (what the game picks from).</summary>
+        public static List<Shop> ShopsForTier(SettlementBase s, SettlementTier tier)
+        {
+            return s.type.GetShops(tier, new List<Shop>());
+        }
+
+        /// <summary>True if one of the tier's shops is built or queued in the city.</summary>
+        public static bool HasTierShop(SettlementBase s, SettlementTier tier)
+        {
+            foreach (var shop in ShopsForTier(s, tier))
+                if (s.buildings.Count(shop.building) > 0 || s.buildingQueue.HasRequestForBuilding(shop.building)) return true;
+            return false;
+        }
+
+        /// <summary>Asks the city to build a shop (same call the game uses after an upgrade).</summary>
+        public static void BuildShop(SettlementBase s, Shop shopPrefab)
+        {
+            s.buildingQueue.RequestBuilding(shopPrefab.building, s.placementContext, null);
+        }
+
         /// <summary>Static tier table (all SettlementTier assets ordered by tierId).</summary>
         public static List<SettlementTier> Tiers()
         {

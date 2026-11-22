@@ -1,13 +1,16 @@
 # Builds the release zips into <repo>\dist (not committed; upload them to a GitHub Release):
 #   ClaudeModLib-v<ver>-toolkit.zip    toolkit only (default download)
 #   ClaudeModLib-v<ver>-with-mods.zip  toolkit + CityProgress + StarterChain
-# Usage: powershell -ExecutionPolicy Bypass -File package.ps1
+# and stages Steam Workshop content folders into <repo>\dist\workshop\<mod>.
+# Usage: powershell -ExecutionPolicy Bypass -File package.ps1 [-WorkshopOnly]
+#   -WorkshopOnly: only stage the Workshop folders (no zips)
+param([switch]$WorkshopOnly)
 $ErrorActionPreference = 'Stop'
 $Repo = Split-Path $PSScriptRoot -Parent
 $Dist = Join-Path $Repo 'dist'
 
 # Compile everything first (compile only: the game may keep running).
-& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'build.ps1') -Mods 'ClaudeModLib,CityProgress,StarterChain' -NoInstall
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'build.ps1') -Mods 'ClaudeModLib,CityProgress,StarterChain,FirstVillageStoreChoice' -NoInstall
 if ($LASTEXITCODE -ne 0) { throw 'build failed' }
 
 $ver = (Get-Content (Join-Path $Repo 'ClaudeModLib\desc.json') -Raw | ConvertFrom-Json).versionString
@@ -15,6 +18,7 @@ $sources = @{
     'ClaudeModLib' = Join-Path $Repo 'ClaudeModLib'
     'CityProgress' = Join-Path $Repo 'CityProgress'
     'StarterChain' = Join-Path $Repo 'RoIMods\StarterChain'
+    'FirstVillageStoreChoice' = Join-Path $Repo 'FirstVillageStoreChoice'
 }
 
 $install = @"
@@ -73,7 +77,10 @@ function Stage-Workshop([string]$mod) {
 }
 
 New-Item -ItemType Directory -Force $Dist | Out-Null
-Make-Zip "ClaudeModLib-v$ver-toolkit.zip" @('ClaudeModLib')   # "toolkit" sorts before "with-mods" on the release page
-Make-Zip "ClaudeModLib-v$ver-with-mods.zip" @('ClaudeModLib', 'CityProgress', 'StarterChain')
+if (-not $WorkshopOnly) {
+    Make-Zip "ClaudeModLib-v$ver-toolkit.zip" @('ClaudeModLib')   # "toolkit" sorts before "with-mods" on the release page
+    Make-Zip "ClaudeModLib-v$ver-with-mods.zip" @('ClaudeModLib', 'CityProgress', 'FirstVillageStoreChoice', 'StarterChain')
+}
 Stage-Workshop 'ClaudeModLib'
 Stage-Workshop 'CityProgress'
+Stage-Workshop 'FirstVillageStoreChoice'

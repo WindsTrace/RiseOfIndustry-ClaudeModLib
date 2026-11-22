@@ -99,6 +99,38 @@ recipe tier/days and `SettlementConfig.shops.demandTierModifiers [10, 9, 4.5, 4.
    starts (4 advancement contracts, `SettlementConfig.advancement.advancementContracts`) and a new shop is chosen.
    Without a permit owner the city waits for a sponsor (`IsWaitingForSponsor`) and stops growing.
 
+Tier names: the game's Chinese translation shows **"村庄" for both Hamlet and Village** — compare `tierId`, never `tierName`.
+
+### Upgrade state machine (`SettlementAdvancement`, private nested classes)
+
+| State | Class | What happens |
+|---|---|---|
+| `GROW` | `GrowState` | Normal growth. `StartAdvancement(actor)` → `ACCEPT`. |
+| `ACCEPT` | `AcceptState` | `Initialize`: possible shops = `nextTier` shops of the city type; contracts created from `nextTier.neededProducts` (random amounts); timeout = today + `timeoutRange`; accept icon over the town. The sponsor accepts (`AcceptAdvancement`) → `DELIVER`. **On timeout without acceptance: a random shop is picked and `Advance` runs (no contracts).** |
+| `DELIVER` | `DeliverState` | Contracts shown; the player picks a shop (`SelectShop`). When contracts are done **and** a shop is selected → `Advance`. If the contract list is empty, `SelectShop` advances immediately. |
+
+`AdvanacementStateBase.Advance` (sic): `tier = tier.nextTier`, `RequestBuilding(selectedShop)`, `OnAdvancementCompleted`
+(fx + world event "Settlement Leveled Up"), back to `GROW`. State, contracts, timeout and selected shop are saved by the game.
+
+### Map generation and the starting village
+
+- `SettlementsWGOperation` assigns initial populations from `SettlementGeneratorConfig.initialPopulation` ranges;
+  `Settlement.Initialize` sets the tier from the population. In practice one city starts as a Village.
+- Initial build (`UrbanAreaInitialBuilder.PerformInitialBuild` → `BuildHouses`): for each tier up to the city's
+  tier, houses then `BuildTierShops(tier)` = `RandomItemAndRemove` from `SettlementType.GetShops(tier)` until
+  `placedShopsCount`. This is where the starting village's random second-tier shop comes from.
+- The player's HQ does not exist yet at that point (it is placed after the map is shown; `Player.hqBuilt`).
+  FirstVillageStoreChoice holds that shop back and later uses the upgrade state machine above (no contracts,
+  no timeout) so the player picks it in the native panel.
+
+## World events (right-side banners)
+
+`StaticWorldEventData` (JSON model `CCWorldEventDataModel`: displayName, description, svgIcon, type Good/Neutral/Bad,
+when, easy/normal/hard `{durationMin, durationMax, effects}`). Triggered with
+`WorldEventManager.instance.TriggerStaticEvent(data, actor.worldEvents, WorldEventCreationParams{region, duration, forceEvent})`.
+`WorldEventDataBase.triggerMode` (`AUTO`/`MANUAL`) is not settable from JSON — set it to `MANUAL` in code or the
+random scheduler may fire the event. 65 vanilla static events exist (seasons, disasters, "Settlement Leveled Up" …).
+
 ## Toolbar / UI
 
 - Top-right toolbar: `ProjectAutomata.MainUIToolbar` collects `MainUIToolButton` children in `Awake` and toggles their

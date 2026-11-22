@@ -126,6 +126,9 @@ namespace ClaudeModLib
             _clickLabel.alignment = TextAnchor.MiddleLeft;
 
             value = Strong(Text(GUI.skin.label, fs + 8, t.header));
+            // Leave room below the baseline: otherwise a comma's tail is clipped and "61,354" reads as "61.354".
+            value.padding = new RectOffset(value.padding.left, value.padding.right, value.padding.top, value.padding.bottom + 5);
+            value.clipping = TextClipping.Overflow;
             _section = new GUIStyle();
             _section.normal.background = Theme.Texture(t.sectionHeader ?? t.button, out border); _section.border = border;
             _section.margin = new RectOffset(0, 0, 6, 4);

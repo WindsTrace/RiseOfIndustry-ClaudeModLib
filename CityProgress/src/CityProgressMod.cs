@@ -84,7 +84,7 @@ namespace CityProgress
             GUILayout.BeginHorizontal();
             GUILayout.Label(r.name.ToUpperInvariant(), Ui.bold);
             GUILayout.FlexibleSpace();
-            GUILayout.Label(r.nextTier != null ? TierName(r.tier) + "  →  " + TierName(r.nextTier) : TierName(r.tier), Ui.small);
+            GUILayout.Label(r.nextTier != null ? Cities.TierName(r.tier) + "  →  " + Cities.TierName(r.nextTier) : Cities.TierName(r.tier), Ui.small);
             GUILayout.EndHorizontal();
 
             // population (big) + status
@@ -110,22 +110,6 @@ namespace CityProgress
             GUILayout.EndVertical();
         }
 
-        // Tier names by tierId. SettlementTier.tierName is already translated by the game in some languages
-        // (Chinese uses "村庄" for both Hamlet and Village), so it cannot be used to tell tiers apart.
-        static string TierName(SettlementTier tier)
-        {
-            if (tier == null) return "?";
-            switch (tier.tierId)
-            {
-                case 100: return Lang.T("Hamlet", "村庄");
-                case 200: return Lang.T("Village", "村镇");
-                case 300: return Lang.T("Town", "城镇");
-                case 400: return Lang.T("City", "城市");
-                case 500: return Lang.T("Metropolis", "大都市");
-                case 1000: return Lang.T("Bloated", "超大都市");
-                default: return tier.tierName;
-            }
-        }
 
         static void Describe(CityStatus s, out string text, out Color color)
         {

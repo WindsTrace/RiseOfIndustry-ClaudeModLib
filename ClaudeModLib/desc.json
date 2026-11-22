@@ -2,7 +2,7 @@
     "author": "Claude (Anthropic)",
     "name": "ClaudeModLib",
     "description": "Shared toolkit for Rise of Industry mods: toolbar button + mod panel, feature switches, rebindable hotkeys, typed game-data / city / shop / tech-tree / content helpers and dev tools.",
-    "version": 3,
-    "versionString": "0.3.0",
+    "version": 4,
+    "versionString": "0.4.0",
     "dependencies": []
 }

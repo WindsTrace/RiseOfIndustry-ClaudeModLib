@@ -1,8 +1,8 @@
-﻿{
+{
     "author": "Claude (Anthropic)",
     "name": "CityProgress",
     "description": "Window showing each city's tier and population progress towards the next tier. Open it from the ClaudeModLib panel.",
-    "version": 4,
-    "versionString": "0.4.0",
+    "version": 5,
+    "versionString": "0.4.1",
     "dependencies": ["ClaudeModLib"]
 }

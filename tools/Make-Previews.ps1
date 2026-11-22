@@ -91,4 +91,30 @@ foreach ($c in $cards) {
 }
 $g.Dispose(); $b.Save((Join-Path $out 'CityProgress.png'), [Drawing.Imaging.ImageFormat]::Png); $b.Dispose()
 
+# --- FirstVillageStoreChoice: banner + choosing the Village shop ------------------------------------
+$b, $g = New-Canvas
+$g.FillRectangle((Brush $brown), 0, 0, 512, 96)
+$g.DrawString('FirstVillageStoreChoice', (& $fBold 38), (Brush $cream), 20, 12)
+$g.DrawString('Choose your starting village''s shop', (& $fBody 22), (Brush (Col '#E3C089')), 22, 60)
+$g.FillRectangle((Brush $orange), 0, 96, 512, 8)
+# banner mock (right-side world event)
+$g.FillRectangle((Brush (Col '#4A3A2C')), 24, 120, 464, 58)
+$g.FillRectangle((Brush $orange), 24, 120, 8, 58)
+$g.DrawString('Choose your village''s shop', (& $fBold 22), (Brush $cream), 44, 124)
+$g.DrawString('Accept the upgrade icon over the town center', (& $fBody 16), (Brush (Col '#E3C089')), 44, 152)
+# shop options (Village tier)
+$shops = 'Grocery Store', 'Clothing Store', 'Toy Store', 'Ironmongery', 'Construction Store'
+$y = 196
+for ($i = 0; $i -lt $shops.Count; $i++) {
+    $sel = ($i -eq 2)
+    $g.FillRectangle((Brush $(if ($sel) { $orange } else { $card })), 24, $y, 464, 42)
+    $g.DrawRectangle((New-Object Drawing.Pen($orange, 2)), 24, $y, 464, 42)
+    $g.DrawString($shops[$i], (& $fBold 21), (Brush $(if ($sel) { $cream } else { $text })), 40, ($y + 8))
+    if ($sel) { $g.DrawString('✓ chosen', (& $fBody 18), (Brush $cream), 474, ($y + 10), $fmtR) }
+    $y += 50
+}
+$g.DrawString('HQ in its region → you choose  ·  elsewhere → vanilla random shop', (& $fBody 15), (Brush $sub), 256, 452, (New-Object Drawing.StringFormat -Property @{ Alignment = 'Center' }))
+$g.DrawString('English / 简体中文', (& $fZh 16), (Brush $sub), 256, 478, (New-Object Drawing.StringFormat -Property @{ Alignment = 'Center' }))
+$g.Dispose(); $b.Save((Join-Path $out 'FirstVillageStoreChoice.png'), [Drawing.Imaging.ImageFormat]::Png); $b.Dispose()
+
 Get-ChildItem $out -Filter *.png | ForEach-Object { "{0}  {1:N0} KB" -f $_.FullName, ($_.Length / 1KB) }

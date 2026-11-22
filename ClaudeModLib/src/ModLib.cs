@@ -104,7 +104,7 @@ namespace ClaudeModLib
     /// <summary>Static entry point of the library.</summary>
     public static class ModLib
     {
-        public const string Version = "0.3.0";
+        public const string Version = "0.4.0";
         public const string ModName = "ClaudeModLib";
         /// <summary>Saved load-order number the library keeps for itself (lower loads earlier; default is 0).</summary>
         public const int LoadOrder = -100;
