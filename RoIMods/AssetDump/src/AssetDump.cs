@@ -18,6 +18,34 @@ namespace AssetDump
     {
         const BindingFlags F = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
+        // One-off glyph check: can the game's TextMeshPro fonts (map labels use Oswald) show pinyin tone letters?
+        const string PinyinChars = "ăĭŏŭĂĬŎŬüÜāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜüĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙ'";
+        float _glyphCheckAt = -1f;
+        bool _glyphChecked;
+
+        void Update()
+        {
+            if (_glyphChecked) return;
+            if (_glyphCheckAt < 0f) { _glyphCheckAt = Time.unscaledTime + 8f; return; }   // wait for the main menu
+            if (Time.unscaledTime < _glyphCheckAt) return;
+            _glyphChecked = true;
+            try
+            {
+                foreach (var font in Resources.FindObjectsOfTypeAll<TMPro.TMP_FontAsset>())
+                {
+                    if (font == null || !font.name.StartsWith("Oswald")) continue;
+                    var missing = new StringBuilder(); var missingWithFallback = new StringBuilder();
+                    foreach (var c in PinyinChars)
+                    {
+                        if (!font.HasCharacter(c)) missing.Append(c);
+                        if (!font.HasCharacter(c, true)) missingWithFallback.Append(c);
+                    }
+                    Debug.Log("[AssetDump] glyphs " + font.name + ": missing in font = '" + missing + "', missing incl. fallbacks = '" + missingWithFallback + "'");
+                }
+            }
+            catch (Exception e) { Debug.LogError("[AssetDump] glyph check failed: " + e); }
+        }
+
         // Types whose fields are dumped in detail. Everything else is listed by name only.
         static readonly string[] DetailTypes =
         {

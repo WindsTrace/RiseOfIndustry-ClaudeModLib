@@ -1,0 +1,8 @@
+{
+    "author": "Claude (Anthropic); city list from \"Chinese Cities Names\" by 兔子",
+    "name": "ChineseCityNamesBilingual",
+    "description": "City names for new maps in Chinese + pinyin, e.g. \"北京 Běijīng\", readable for Chinese and non-Chinese players. Choose \"中国 汉字+拼音 / China (Hanzi + Pinyin)\" in the new-game settings.",
+    "version": 1,
+    "versionString": "0.1.0",
+    "dependencies": []
+}
