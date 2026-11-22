@@ -1,0 +1,14 @@
+{
+    "type": "ProjectAutomata.ContentCreationModels.CCWorldEventDataModel",
+    "object": {
+        "name": "FVSC_ChooseVillageShop_en",
+        "displayName": "Choose your village's shop",
+        "description": "The village in your HQ region is waiting for you: click the upgrade icon above its town center, accept, and choose its second-tier shop.",
+        "svgIcon": "fvsc_shop",
+        "type": "Good",
+        "when": 0,
+        "easy":   { "durationMin": 30, "durationMax": 30, "effects": [] },
+        "normal": { "durationMin": 30, "durationMax": 30, "effects": [] },
+        "hard":   { "durationMin": 30, "durationMax": 30, "effects": [] }
+    }
+}

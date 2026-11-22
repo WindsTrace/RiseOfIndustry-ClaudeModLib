@@ -106,6 +106,8 @@ namespace ClaudeModLib
     {
         public const string Version = "0.3.0";
         public const string ModName = "ClaudeModLib";
+        /// <summary>Saved load-order number the library keeps for itself (lower loads earlier; default is 0).</summary>
+        public const int LoadOrder = -100;
 
         static ClaudeModLibMod _instance;
         static readonly List<ModHandle> _mods = new List<ModHandle>();
@@ -168,6 +170,16 @@ namespace ClaudeModLib
             string libPath = null;
             foreach (var mi in mod.modLoader.allMods) if (mi.description.name == ModName) libPath = mi.modPath;
             Theme.Init(libPath ?? ".");
+
+            // Game bug: ModLoader.OrderMods sorts by dependencies, then re-sorts by the saved "ModOrder_<name>"
+            // numbers, which can put a mod before the library it depends on (-> ReflectionTypeLoadException).
+            // Keep the library first for the next launch. Mods without a saved number default to 0.
+            if (PlayerPrefs.GetInt("ModOrder_" + ModName, 0) > LoadOrder)
+            {
+                PlayerPrefs.SetInt("ModOrder_" + ModName, LoadOrder);
+                PlayerPrefs.Save();
+                Log.Info("load order pinned to " + LoadOrder + " (before mods that depend on it)");
+            }
             Register(mod, "ClaudeModLib");
             Log.Info("v" + Version + " bootstrapped");
         }

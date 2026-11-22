@@ -1,0 +1,8 @@
+{
+    "author": "Claude (Anthropic)",
+    "name": "FirstVillageStoreChoice",
+    "description": "Choose the second-tier shop of the pre-upgraded starting village yourself: place your HQ in its region, accept the native upgrade and pick the shop. HQ elsewhere = vanilla random shop.",
+    "version": 1,
+    "versionString": "0.1.0",
+    "dependencies": ["ClaudeModLib"]
+}

@@ -46,15 +46,14 @@ namespace AssetDump
             {
                 var all = modLoader.GetAllMods(true, new List<ModInstance>());
                 // Only re-enable our own dev mods; workshop mods keep whatever state the player chose.
-                var devMods = new HashSet<string> { "AssetDump", "ClaudeModLib", "StarterChain", "CityProgress" };
+                var devMods = new HashSet<string> { "AssetDump", "ClaudeModLib", "StarterChain", "CityProgress", "FirstVillageStoreChoice" };
                 foreach (var mi in all)
                     if (!mi.isEnabled && devMods.Contains(mi.description.name)) modLoader.EnableMod(mi.description.name);
-                var ordered = new List<ModInstance>();
-                foreach (var mi in all) if (mi.description.name == "AssetDump") ordered.Add(mi);
-                foreach (var mi in all) if (mi.description.name != "AssetDump") ordered.Add(mi);
-                modLoader.SetModOrder(ordered);
+                // Only move AssetDump to the front. Do NOT renumber other mods: the game sorts by these numbers
+                // AFTER its dependency sort, so explicit numbers can put a mod before the library it depends on.
+                PlayerPrefs.SetInt("ModOrder_AssetDump", -200);
                 PlayerPrefs.Save();
-                Debug.Log("[AssetDump] all mods re-enabled for next launch; AssetDump ordered first");
+                Debug.Log("[AssetDump] dev mods re-enabled for next launch; AssetDump ordered first");
             }
             catch (Exception e) { Debug.LogError("[AssetDump] re-enable failed: " + e); }
         }

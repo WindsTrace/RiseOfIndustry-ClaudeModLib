@@ -1,0 +1,14 @@
+{
+    "type": "ProjectAutomata.ContentCreationModels.CCWorldEventDataModel",
+    "object": {
+        "name": "FVSC_ChooseVillageShop_zh",
+        "displayName": "选择村镇的二级商店",
+        "description": "总部所在区的村镇正等你决定：点击它城镇中心上方的升级图标，接受后选择它的二级商店。",
+        "svgIcon": "fvsc_shop",
+        "type": "Good",
+        "when": 0,
+        "easy":   { "durationMin": 30, "durationMax": 30, "effects": [] },
+        "normal": { "durationMin": 30, "durationMax": 30, "effects": [] },
+        "hard":   { "durationMin": 30, "durationMax": 30, "effects": [] }
+    }
+}

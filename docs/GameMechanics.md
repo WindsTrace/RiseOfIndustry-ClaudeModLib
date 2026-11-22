@@ -11,8 +11,12 @@ several details are outdated — marked ⚠ below).
   `desc.json` makes pre-loading fail and **no mod loads at all**.
 - Per mod, in order: `code\*.dll` (loaded with `Assembly.LoadFile`; every `Mod` subclass gets its own GameObject
   and `OnModWasLoaded()` is called) → `assets\` → `content\`. After all mods: `OnAllModsLoaded()`.
-- `dependencies` are loaded first. Because of `LoadFile`, a mod referencing another mod's DLL needs an
-  `AppDomain.AssemblyResolve` handler (ClaudeModLib installs one for itself).
+- `dependencies` are sorted first (topological sort) — **but** `ModLoader.OrderMods` then re-sorts the list by the
+  saved `ModOrder_<name>` PlayerPrefs numbers (default 0; the in-game mod manager writes 0..n). An explicit number can
+  therefore put a mod *before* a library it depends on → `ReflectionTypeLoadException` and the rest stops loading.
+  ClaudeModLib pins its own number to -100 every time it loads; dev tools must not renumber other mods.
+- Because of `LoadFile`, a mod referencing another mod's DLL needs an `AppDomain.AssemblyResolve` handler
+  (ClaudeModLib installs one for itself).
 - `CodeLoader.LoadDLL` scans each mod assembly for new **content creation models** and **asset loaders**:
   mods can extend the JSON system and asset formats.
 - **Any exception while loading a mod** → that mod is disabled (PlayerPrefs `ProjectAutomata.ModLoader.DISABLED_MODS_PPKEY`)
