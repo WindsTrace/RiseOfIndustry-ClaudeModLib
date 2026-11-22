@@ -2,7 +2,7 @@
     "type": "ProjectAutomata.SettlementNameList",
     "object": {
         "name": "ChineseCitiesNamesBilingual",
-        "displayName": "中国 汉字+拼音 / China (Hanzi + Pinyin)",
+        "displayName": "China 汉字+Pinyin",
         "uiOrder": 501,
         "names": [
             "北京 Běijīng",
